@@ -15,7 +15,7 @@ ui <- dashboardPage(
       div( id = 'sidebar_setup',
            conditionalPanel("input.sidebar === 'application'",
                             fluidRow(
-                              column(7,selectInput(inputId="template",label='Select template (TODO)',multiple=F,choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS"))),
+                              column(7,selectInput(inputId="template",label='Select template (TODO)',multiple=F,choices=c("CHEERS","STROBE","TRIPOD","PROBAST","Custom",selected="CHEERS"))),
                               column(4,downloadButton("download_template"),style = 'margin-top:35px')),
                             fileInput("upload", "Upload completed template (.csv)", accept = c(".csv")),
                             fluidRow(column(7,h4(strong("Figure customisation (TODO)")),style = 'margin-left:15px'))
@@ -117,7 +117,7 @@ server <- function(input, output,session) {
              "STROBE" = "STROBE_template.csv",
              "TRIPOD" = "TRIPOD_template.csv",
              "PROBAST" = "PROBAST_template.csv",
-             )
+             "Custom" = "Custom_template.csv")
       
     },
     content <- function(file,...) {
@@ -125,7 +125,8 @@ server <- function(input, output,session) {
              "CHEERS" = file.copy("./data/template_cheers.csv", file),
              "STROBE" = file.copy("./data/template_strobe.csv", file),
              "TRIPOD" = file.copy("./data/template_tripod.csv", file),
-             "PROBAST" = file.copy("./data/template_probast.csv", file))
+             "PROBAST" = file.copy("./data/template_probast.csv", file),
+             "Custom" = file.copy("./data/template_custom.csv", file))
     }
   )
   
