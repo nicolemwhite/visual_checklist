@@ -32,14 +32,16 @@ sidebar <- dashboardSidebar(
                                fluidRow(
                                  column(7,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS"))),
                                  column(4,downloadButton("download_template"),style = 'margin-top:35px')),
-                               fileInput("upload", "Upload completed template (.csv)", accept = c(".csv"))),
+                               fileInput("upload", "Upload completed template (.csv)", accept = c(".csv"))
+                               ),
               
               conditionalPanel(condition="input.sidebar == 'customise'",
                                fluidRow(style='margin-left:0px',
                                         column(6,selectInput('colourscheme',label='Choose colour scheme (todo)',choices = names(colourschemes),selected = 'Greyscale')),
                                         column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
                                fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label (todo)',value = 'todo')),
-                                        column(6,textInput('ylabtext',label='y-axis label (todo)',value = 'todo')))
+                                        column(6,textInput('ylabtext',label='y-axis label (todo)',value = 'todo'))),
+                               fluidRow(uiOutput("sliders"),style='margin-top:10px')
               )
   )
 )
@@ -136,14 +138,21 @@ server <- function(input, output,session) {
     
   })
   
-  output$head <- renderTable(data())
-  
+
   #need to hardcode item order|checklist
-  plot_studies <- function(){
+  # prepare_plot_data <- function(){
+  #   plot_data = data() %>% mutate(author_year = paste(author,year)) %>% select(-author,-year) %>%
+  #     gather(item,item_score,-author_year) %>% mutate_at('item_score',~replace_na(.,'missing'))
+  #  return(plot_data) 
+  # }
+  
+  plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
-    
+    #plot_data <- prepare_plot_data()$plot_data
     plot_data = data() %>% mutate(author_year = paste(author,year)) %>% select(-author,-year) %>%
-      gather(item,item_score,-author_year) %>% mutate_at('item_score',~replace_na(.,'missing'))
+      gather(item,item_score,-author_year) %>% mutate_at('item_score',~replace_na(.,'missing')) %>%
+      mutate_at('item_score',~factor(.))
+    
     if(input$chooseViz=="Full dataset"){
       final_plot <- plot_data %>% ggplot(aes(x=str_wrap(item,30),y=author_year,fill=item_score))+
         geom_tile(colour = 'white', size = 0.5) +
@@ -173,10 +182,10 @@ server <- function(input, output,session) {
         labs(y='Checklist item')
     }
     final_plot <- final_plot +scale_fill_manual(values=cbPalette)
-    return(final_plot)
+    return(list(final_plot=final_plot,plot_data=plot_data))
   }
-  
-  output$plot1 <- renderPlot({plot_studies()})
+
+  output$plot1 <- renderPlot({plot_studies()$final_plot})
   
   #figure
   fn_download_fig <- function()
@@ -211,7 +220,45 @@ server <- function(input, output,session) {
       fn_download_fig()
       file.copy(fn_downloadname_fig(), file, overwrite=T)
     }
-  )  
+  )
+  #examle dynamic number of inputs
+  n_categories <- reactiveValues(K=NULL,item_label = NULL)
+  
+  observeEvent(input$upload,{
+  n_categories$item_label<<-levels(plot_studies()$plot_data$item_score)
+  n_categories$K<<-length(unique(plot_studies()$plot_data$item_score))
+  })
+
+  output$sliders <- renderUI({
+    #item_labels
+    if(!is.null(n_categories$K)){
+      item_order <- rep("",n_categories$K);item_order[1]<-'Order'
+      item_colour <- rep("",n_categories$K);item_colour[1]<-'Colour'
+      tagList(
+        h4('Customise item scores',style='margin-left:40px;font-family: "Arial";font-size: 16px;font-weight:bold;'),
+        lapply(1:as.integer(n_categories$K), function(i) 
+          fluidRow(
+            column(4,HTML(paste0('<br>',n_categories$item_label[[i]],'<br>')),style='margin-top:20px;text-align: right'),
+            column(2,numericInput(input=paste0('itemLabel',i),value=i,label=item_order[i])),
+            column(3,textInput(input=paste0('itemColour',i),value=cbPalette[i],label=item_colour[i]))
+          )
+        ),
+        (column(4,actionButton(inputId = "updateItems",label="Update items",icon=icon('arrows'),style='margin-left:30px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'))),
+      )
+    }
+    else NULL
+  })
+  
+  #todo: if item features updates, makes changes in plot_data
+  observeEvent(input$updateItems){
+    NULL
+  }
+  
+
+  
+  
+  #column(4,  HTML('<b>A lnger title</b>'),style='margin-top:20px'),
+  #column(2, numericInput("a1", label = "Order", value = 1))
   
 }
 shinyApp(ui, server)
