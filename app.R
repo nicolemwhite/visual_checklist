@@ -28,11 +28,11 @@ sidebar<- dashboardSidebar(
     width=600,
     sidebarMenu(
       id = 'sidebar',
-      menuItem("Application", tabName = "application", icon = icon("list"),startExpanded = T),
-      menuItem("Customisation", tabName = "customise", icon = icon("wrench"),collapsible=T),
+      menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = F),
+      menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=T),
       
       div(id = 'sidebar_setup',
-          conditionalPanel("input.sidebar == 'application'",
+          conditionalPanel("input.sidebar == 'setup'",
                            fluidRow(
                              column(7,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS"))),
                              column(4,downloadButton("download_template"),style = 'margin-top:35px')),
@@ -53,7 +53,7 @@ sidebar<- dashboardSidebar(
                                     column(3,numericInput(inputId = "fwidth",label = "Width (cm)",min = 8,max = 22,step = 1,value = 15))),
                            fluidRow(style='margin-left:0px',column(10,textInput(inputId = 'fig_fname',label='Figure name',value='figure'))),
                            fluidRow(column(6,downloadButton("downloadFigure", "Download Figure",style = 'margin-left:30px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')))
-          )
+          ),
           ),
       
       menuItem("References", tabName = "citation", icon = icon("list-alt"))
@@ -64,7 +64,7 @@ body <- dashboardBody(
     
     tabItems(
       # main output window
-      tabItem(tabName = "application",
+      tabItem(tabName = "setup",
               column(2,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
               downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
               fluidRow(box(title=NULL,solidHeader=T,width=12,column(12,align="center",plotOutput("plot1",width = "1000px",height = "800px"))))
