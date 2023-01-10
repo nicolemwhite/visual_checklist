@@ -60,7 +60,7 @@ body <- dashboardBody(
               column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
               column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
             ),
-            fluidRow(box(title=NULL,solidHeader=T,width=12,column(12,align="center",plotOutput("plot1",width = "1000px",height = "800px"))))
+            fluidRow(box(title=NULL,solidHeader=T,width=12,column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))))
     ),
     #citation info
     tabItem(tabName = 'citation',h3('References'))
@@ -139,32 +139,32 @@ server <- function(input, output,session) {
   })
   
 
-  #need to hardcode item order|checklist
-  # prepare_plot_data <- function(){
-  #   plot_data = data() %>% mutate(author_year = paste(author,year)) %>% select(-author,-year) %>%
-  #     gather(item,item_score,-author_year) %>% mutate_at('item_score',~replace_na(.,'missing'))
-  #  return(plot_data) 
-  # }
+
   
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
     #plot_data <- prepare_plot_data()$plot_data
-    plot_data = data() %>% mutate(author_year = paste(author,year)) %>% select(-author,-year) %>%
-      gather(item,item_score,-author_year) %>% mutate_at('item_score',~replace_na(.,'missing')) %>%
-      mutate_at('item_score',~factor(.))
+    plot_data = data() %>% 
+      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
+      mutate_at('item_score',~factor(.)) %>%
+      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+    
+   item_lookup = plot_data %>% distinct(item_number,item_text)
     
     if(input$chooseViz=="Full dataset"){
-      final_plot <- plot_data %>% ggplot(aes(x=str_wrap(item,30),y=author_year,fill=item_score))+
+      final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
         geom_tile(colour = 'white', size = 0.5) +
+        scale_x_discrete("Checklist item",breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = show_legend,legend.direction = 'horizontal') +
-        labs(x = 'Checklist item', y = 'Study')
+        labs(y = 'Study')
     }
+   
     if(input$chooseViz=="Summary by study"){
-      n_items = length(unique(plot_data$item))
-      final_plot <- plot_data %>% ggplot(aes(y=author_year,fill=item_score))+geom_bar()+
+      n_items = length(unique(plot_data$item_number))
+      final_plot <- plot_data %>% ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
         scale_x_continuous('Number of items',breaks=0:n_items)+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
@@ -173,13 +173,13 @@ server <- function(input, output,session) {
       
     }
     if(input$chooseViz=="Summary by checklist item"){
-      n_studies = length(unique(plot_data$author_year))
-      final_plot <- plot_data %>% ggplot(aes(y=str_wrap(item,30),fill=item_score))+geom_bar()+
+      n_studies = length(unique(plot_data$study_label))
+      final_plot <- plot_data %>% ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
         scale_x_continuous('Number of studies',breaks=0:n_studies)+
+        scale_y_discrete("Checklist item",breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
-              legend.title = element_blank(),legend.position = 'top',legend.direction = 'horizontal')+
-        labs(y='Checklist item')
+              legend.title = element_blank(),legend.position = 'top',legend.direction = 'horizontal')
     }
     final_plot <- final_plot +scale_fill_manual(values=cbPalette)
     return(list(final_plot=final_plot,plot_data=plot_data))
@@ -243,16 +243,16 @@ server <- function(input, output,session) {
             column(3,textInput(input=paste0('itemColour',i),value=cbPalette[i],label=item_colour[i]))
           )
         ),
-        (column(4,actionButton(inputId = "updateItems",label="Update items",icon=icon('arrows'),style='margin-left:30px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'))),
+        column(4,actionButton(inputId = "updateItems",label="Update items",icon=icon('arrows'),style='margin-left:30px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')),
       )
     }
     else NULL
   })
   
-  #todo: if item features updates, makes changes in plot_data
-  observeEvent(input$updateItems){
-    NULL
-  }
+  # #todo: if item features updates, makes changes in plot_data
+  # observeEvent(input$updateItems){
+  #   NULL
+  # }
   
 
   
