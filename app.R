@@ -15,7 +15,8 @@ colourschemes <- list('Greyscale' = c("#000000","#737373","#BDBDBD","#D9D9D9","#
                       "Set1" = brewer.pal(n=8,name="Set1"),
                       "Set2"=brewer.pal(n=8,name="Set2"),
                       "Set3"=brewer.pal(n=8,name="Set3"),
-                      'Colour-blind friendly'=  c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"))
+                      'Colour-blind friendly'=  c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"),
+                      'Custom'=c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"))
 themes <- list("Light" = theme_light(),"Minimal" = theme_minimal(),"Black/White" = theme_bw(),"Classic" = theme_classic(),"Gray"=theme_gray())
 legend_positions <- list("No" = 'none',"Yes" = 'top')
 
@@ -37,7 +38,7 @@ sidebar <- dashboardSidebar(
               
 
                                fluidRow(style='margin-left:0px',
-                                        column(6,selectInput('colourscheme',label='Choose colour scheme (todo)',choices = names(colourschemes),selected = 'Greyscale')),
+                                        column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Greyscale')),
                                         column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
                                
                                fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label(todo)',value = NULL)),
@@ -140,18 +141,26 @@ server <- function(input, output,session) {
     
   })
   
+  #reactive functions for colourpicker
+  choose_palette <- reactive({
+  if (input$colourscheme=='Custom'){"square"}
+    else {"limited"}
+  })
+  choose_colours <-reactive({
+    if (input$colourscheme=='Custom'){NULL}
+    else {colourschemes[[input$colourscheme]]}
+  })
   
   observeEvent(input$upload,{
     
     #run the main function to create custom UI
     plot_output<-plot_studies()
-    # plot_output$item_colours[i]
-    
+
     output$customItem <- renderUI({
       lapply(1:plot_output$K,function(i) 
         column(5,colourInput(input=paste0('itemColour',i,sep='_'), 
                              label=plot_output$item_scores[i],value=colourschemes[[input$colourscheme]][i],
-                             palette = "limited",allowedCols= colourschemes[[input$colourscheme]],closeOnClick = T),style='margin-left:10px'))      
+                             palette = choose_palette(),allowedCols= choose_colours(),closeOnClick = T),style='margin-left:10px'))      
       
     })
     
