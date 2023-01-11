@@ -1,9 +1,9 @@
-
 ## app.R ##
 library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(tidyverse)
+library(colourpicker)
 library(RColorBrewer)
 
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -33,18 +33,20 @@ sidebar <- dashboardSidebar(
                                  column(7,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS"))),
                                  column(4,downloadButton("download_template"),style = 'margin-top:35px')),
                                fileInput("upload", "Upload completed template (.csv)", accept = c(".csv"))
-                               ),
+              ),
               
-              conditionalPanel(condition="input.sidebar == 'customise'",
+
                                fluidRow(style='margin-left:0px',
                                         column(6,selectInput('colourscheme',label='Choose colour scheme (todo)',choices = names(colourschemes),selected = 'Greyscale')),
                                         column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
-                               fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label (todo)',value = 'todo')),
-                                        column(6,textInput('ylabtext',label='y-axis label (todo)',value = 'todo'))),
-                               fluidRow(uiOutput("sliders"),style='margin-top:10px')
-              )
+                               
+                               fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label(todo)',value = NULL)),
+                                        column(6,textInput('ylabtext',label='y-axis label (todo)',value = NULL))),
+              fluidRow(uiOutput("customItem"),style='margin-top:10px')
+
   )
 )
+
 
 ## Body content
 body <- dashboardBody(
@@ -138,18 +140,48 @@ server <- function(input, output,session) {
     
   })
   
-
-
+  
+  observeEvent(input$upload,{
+    
+    #run the main function to create custom UI
+    plot_output<-plot_studies()
+    # plot_output$item_colours[i]
+    
+    output$customItem <- renderUI({
+      lapply(1:plot_output$K,function(i) 
+        column(5,colourInput(input=paste0('itemColour',i,sep='_'), 
+                             label=plot_output$item_scores[i],value=colourschemes[[input$colourscheme]][i],
+                             palette = "limited",allowedCols= colourschemes[[input$colourscheme]],closeOnClick = T),style='margin-left:10px'))      
+      
+    })
+    
+    
+    
+    
+  })
+  
+  #plot the result only if output$customItem exists
+  output$plot1 <- renderPlot({
+    plot_output<-plot_studies()
+    
+    plot_colours <- unlist(sapply(1:plot_output$K, function(i) {input[[paste0("itemColour", i, sep="_")]]}))
+    
+    if(length(plot_colours)>0){
+      plot_output$final_plot+scale_fill_manual(values=plot_colours)
+    }
+    else{NULL}
+    
+  })
   
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
-    #plot_data <- prepare_plot_data()$plot_data
+    
     plot_data = data() %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
     
-   item_lookup = plot_data %>% distinct(item_number,item_text)
+    item_lookup = plot_data %>% distinct(item_number,item_text)
     
     if(input$chooseViz=="Full dataset"){
       final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
@@ -158,34 +190,37 @@ server <- function(input, output,session) {
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=14),
-              legend.title = element_blank(),legend.position = show_legend,legend.direction = 'horizontal') +
-        labs(y = 'Study')
+              legend.title = element_blank(),legend.position = show_legend) +
+        labs(y = "Study")
     }
-   
+    
     if(input$chooseViz=="Summary by study"){
       n_items = length(unique(plot_data$item_number))
       final_plot <- plot_data %>% ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
-        scale_x_continuous('Number of items',breaks=0:n_items)+
+        scale_x_continuous("Number of checklist items",breaks=0:n_items)+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
-              legend.title = element_blank(),legend.position = 'top',legend.direction = 'horizontal')+
-        labs(y='Study')
+              legend.title = element_blank(),legend.position = show_legend)+
+        labs(y="Study")
       
     }
     if(input$chooseViz=="Summary by checklist item"){
       n_studies = length(unique(plot_data$study_label))
       final_plot <- plot_data %>% ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
-        scale_x_continuous('Number of studies',breaks=0:n_studies)+
+        scale_x_continuous("Number of studies",breaks=0:n_studies)+
         scale_y_discrete("Checklist item",breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
-              legend.title = element_blank(),legend.position = 'top',legend.direction = 'horizontal')
+              legend.title = element_blank(),legend.position = show_legend)
     }
-    final_plot <- final_plot +scale_fill_manual(values=cbPalette)
-    return(list(final_plot=final_plot,plot_data=plot_data))
+    
+    
+    K <-length(levels(plot_data$item_score))
+    item_scores<-levels(plot_data$item_score)
+    return(list(final_plot=final_plot,plot_data=plot_data,K=K,item_scores=item_scores))
   }
-
-  output$plot1 <- renderPlot({plot_studies()$final_plot})
+  
+  
   
   #figure
   fn_download_fig <- function()
@@ -221,44 +256,7 @@ server <- function(input, output,session) {
       file.copy(fn_downloadname_fig(), file, overwrite=T)
     }
   )
-  #examle dynamic number of inputs
-  n_categories <- reactiveValues(K=NULL,item_label = NULL)
-  
-  observeEvent(input$upload,{
-  n_categories$item_label<<-levels(plot_studies()$plot_data$item_score)
-  n_categories$K<<-length(unique(plot_studies()$plot_data$item_score))
-  })
 
-  output$sliders <- renderUI({
-    #item_labels
-    if(!is.null(n_categories$K)){
-      item_order <- rep("",n_categories$K);item_order[1]<-'Order'
-      item_colour <- rep("",n_categories$K);item_colour[1]<-'Colour'
-      tagList(
-        h4('Customise item scores',style='margin-left:40px;font-family: "Arial";font-size: 16px;font-weight:bold;'),
-        lapply(1:as.integer(n_categories$K), function(i) 
-          fluidRow(
-            column(4,HTML(paste0('<br>',n_categories$item_label[[i]],'<br>')),style='margin-top:20px;text-align: right'),
-            column(2,numericInput(input=paste0('itemLabel',i),value=i,label=item_order[i])),
-            column(3,textInput(input=paste0('itemColour',i),value=cbPalette[i],label=item_colour[i]))
-          )
-        ),
-        column(4,actionButton(inputId = "updateItems",label="Update items",icon=icon('arrows'),style='margin-left:30px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')),
-      )
-    }
-    else NULL
-  })
-  
-  # #todo: if item features updates, makes changes in plot_data
-  # observeEvent(input$updateItems){
-  #   NULL
-  # }
-  
-
-  
-  
-  #column(4,  HTML('<b>A lnger title</b>'),style='margin-top:20px'),
-  #column(2, numericInput("a1", label = "Order", value = 1))
   
 }
 shinyApp(ui, server)
