@@ -170,16 +170,21 @@ server <- function(input, output,session) {
   })
   
   #plot the result only if output$customItem exists
-  output$plot1 <- renderPlot({
-    plot_output<-plot_studies()
-    
-    plot_colours <- unlist(sapply(1:plot_output$K, function(i) {input[[paste0("itemColour", i, sep="_")]]}))
+  plot_output<-reactive({plot_studies()})
+  
+  create_custom_plot <- function(){
+    plot_colours <- unlist(sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]}))
     
     if(length(plot_colours)>0){
-      plot_output$final_plot+scale_fill_manual(values=plot_colours)
+      return(plot_output()$final_plot+scale_fill_manual(values=plot_colours))
     }
     else{NULL}
     
+  }
+  
+  output$plot1 <- renderPlot({
+    req(plot_output())
+    create_custom_plot()
   })
   
   plot_studies <-function(){
@@ -243,14 +248,14 @@ server <- function(input, output,session) {
     if(input$fformat=="tiff") tiff(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="in", compression="lzw")
     if(input$fformat=="jpeg") jpeg(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="in", quality=100)
     
-    g = plot_studies()
+    g = create_custom_plot()
     print(g)
     dev.off()
   }
   # create filename
   fn_downloadname_fig <- reactive({
     
-    fname = "Figure" #isolate(input$fig_fname)
+    fname = "checklist_figure" #isolate(input$fig_fname)
     if(input$fformat=="png") filename <- paste0(fname,".png",sep="")
     if(input$fformat=="tiff") filename <- paste0(fname,".tif",sep="")
     if(input$fformat=="jpeg") filename <- paste0(fname,".jpg",sep="")
