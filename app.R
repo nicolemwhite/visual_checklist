@@ -27,25 +27,22 @@ sidebar <- dashboardSidebar(
   width=600,
   sidebarMenu(id = "sidebar",
               menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = T),
-              menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=F),
+              #menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=F),
               menuItem("Code", tabName = "code", icon = icon("code"),startExpanded = T),
               menuItem("References", tabName = "citation", icon = icon("list-alt")),
               conditionalPanel(condition="input.sidebar == 'setup'",
                                fluidRow(
                                  column(7,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS"))),
-                                 column(4,downloadButton("download_template"),style = 'margin-top:35px')),
-                               fileInput("upload", "Upload completed template (.csv)", accept = c(".csv"))
-              ),
-              
-              
-              fluidRow(style='margin-left:0px',
-                       column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Greyscale')),
-                       column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
-              
-              fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL)),
-                       column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
-              fluidRow(uiOutput("customItem"),style='margin-top:10px')
-              
+                                 column(4,downloadButton("download_template",style = 'margin-top:35px;background-color:#f9f9f9;font-family: Arial;font-weight: bold'))),
+                               fluidRow(fileInput("upload", "Upload completed template (.csv)", accept = c(".csv")),style='margin-left:15px'),
+                               fluidRow(style='margin-left:0px',
+                                        column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Custom'))),
+                               fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL)),
+                                        column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
+                               fluidRow(column(6,radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE),style='margin-left:15px')),
+                               fluidRow(uiOutput("customItem"),style='margin-top:10px'),
+                               column(6, tags$a(href="http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/", "Hexidecimal colour codes",style='color: #EAE23B'),style='margin-top:0px;margin-left:15px')
+              )
   )
 )
 
@@ -162,6 +159,7 @@ server <- function(input, output,session) {
            "Summary by checklist item" = c('Number of studies','Checklist item')
     )
   })
+
   
   observe({
     updateTextInput(session,"xlabtext",value=define_axis_labels()[1])
@@ -178,10 +176,12 @@ server <- function(input, output,session) {
         column(5,colourInput(input=paste0('itemColour',i,sep='_'), 
                              label=plot_output$item_scores[i],value=colourschemes[[input$colourscheme]][i],
                              palette = choose_palette(),allowedCols= choose_colours(),closeOnClick = T),style='margin-left:10px'))      
+  
+      
       
     })
     
-    
+
     
     
   })
