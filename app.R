@@ -28,6 +28,7 @@ sidebar <- dashboardSidebar(
   sidebarMenu(id = "sidebar",
               menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = T),
               menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=F),
+              menuItem("Code", tabName = "code", icon = icon("code"),startExpanded = T),
               menuItem("References", tabName = "citation", icon = icon("list-alt")),
               conditionalPanel(condition="input.sidebar == 'setup'",
                                fluidRow(
@@ -36,15 +37,15 @@ sidebar <- dashboardSidebar(
                                fileInput("upload", "Upload completed template (.csv)", accept = c(".csv"))
               ),
               
-
-                               fluidRow(style='margin-left:0px',
-                                        column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Greyscale')),
-                                        column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
-                               
-                               fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label(todo)',value = NULL)),
-                                        column(6,textInput('ylabtext',label='y-axis label (todo)',value = NULL))),
+              
+              fluidRow(style='margin-left:0px',
+                       column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Greyscale')),
+                       column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
+              
+              fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label(todo)',value = NULL)),
+                       column(6,textInput('ylabtext',label='y-axis label (todo)',value = NULL))),
               fluidRow(uiOutput("customItem"),style='margin-top:10px')
-
+              
   )
 )
 
@@ -55,16 +56,33 @@ body <- dashboardBody(
   tabItems(
     # main output window
     tabItem(tabName = "setup",
-            fluidRow(
-              column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
-              downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
-              column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
-              column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
-              column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
-              column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
-            ),
-            fluidRow(box(title=NULL,solidHeader=T,width=12,column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))))
+
+                         fluidRow(
+                           column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
+                           downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
+                           column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
+                           column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
+                           column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
+                           column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
+                         ),
+                         column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))
     ),
+    
+    
+    #         box(width = 12, 
+    #             fluidRow(
+    #               column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
+    #               downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
+    #               column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
+    #               column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
+    #               column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
+    #               column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
+    #             ),
+    #             fluidRow(solidHeader=T,width=12,column(12,align="center",plotOutput("plot1",width = "auto",height = "800px")))
+    #         ),
+    #         box(width=12,renderPrint('vtout'))
+    # ),
+    tabItem(tabName='code',box(title='Code to generate figure',renderPrint('vtout'))),
     #citation info
     tabItem(tabName = 'citation',h3('References'))
   ),
@@ -143,7 +161,7 @@ server <- function(input, output,session) {
   
   #reactive functions for colourpicker
   choose_palette <- reactive({
-  if (input$colourscheme=='Custom'){"square"}
+    if (input$colourscheme=='Custom'){"square"}
     else {"limited"}
   })
   choose_colours <-reactive({
@@ -155,7 +173,7 @@ server <- function(input, output,session) {
     
     #run the main function to create custom UI
     plot_output<-plot_studies()
-
+    
     output$customItem <- renderUI({
       lapply(1:plot_output$K,function(i) 
         column(5,colourInput(input=paste0('itemColour',i,sep='_'), 
@@ -185,6 +203,12 @@ server <- function(input, output,session) {
   output$plot1 <- renderPlot({
     req(plot_output())
     create_custom_plot()
+  })
+  
+  
+  output$vtout <- renderPrint({
+    cat("here is some text", 
+        "some", "code", sep = "\n")
   })
   
   plot_studies <-function(){
@@ -270,7 +294,7 @@ server <- function(input, output,session) {
       file.copy(fn_downloadname_fig(), file, overwrite=T)
     }
   )
-
+  
   
 }
 shinyApp(ui, server)
