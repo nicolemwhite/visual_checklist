@@ -42,8 +42,8 @@ sidebar <- dashboardSidebar(
                        column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Greyscale')),
                        column(6, radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE))),
               
-              fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label(todo)',value = NULL)),
-                       column(6,textInput('ylabtext',label='y-axis label (todo)',value = NULL))),
+              fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL)),
+                       column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
               fluidRow(uiOutput("customItem"),style='margin-top:10px')
               
   )
@@ -67,23 +67,9 @@ body <- dashboardBody(
                          ),
                          column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))
     ),
-    
-    
-    #         box(width = 12, 
-    #             fluidRow(
-    #               column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
-    #               downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
-    #               column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
-    #               column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
-    #               column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
-    #               column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
-    #             ),
-    #             fluidRow(solidHeader=T,width=12,column(12,align="center",plotOutput("plot1",width = "auto",height = "800px")))
-    #         ),
-    #         box(width=12,renderPrint('vtout'))
-    # ),
+
     tabItem(tabName='code',box(title='Code to generate figure',renderPrint('vtout'))),
-    #citation info
+    #citation info: 
     tabItem(tabName = 'citation',h3('References'))
   ),
   
@@ -169,6 +155,19 @@ server <- function(input, output,session) {
     else {colourschemes[[input$colourscheme]]}
   })
   
+  define_axis_labels<-reactive({
+    switch(input$chooseViz,
+           "Full dataset" = c('Checklist item','Study'),
+           "Summary by study" = c('Number of checklist items','Study'),
+           "Summary by checklist item" = c('Number of studies','Checklist item')
+    )
+  })
+  
+  observe({
+    updateTextInput(session,"xlabtext",value=define_axis_labels()[1])
+    updateTextInput(session,"ylabtext",value=define_axis_labels()[2])
+  })
+  
   observeEvent(input$upload,{
     
     #run the main function to create custom UI
@@ -224,29 +223,29 @@ server <- function(input, output,session) {
     if(input$chooseViz=="Full dataset"){
       final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
         geom_tile(colour = 'white', size = 0.5) +
-        scale_x_discrete("Checklist item",breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
+        scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = show_legend) +
-        labs(y = "Study")
+        labs(y = input$ylabtext)
     }
     
     if(input$chooseViz=="Summary by study"){
       n_items = length(unique(plot_data$item_number))
       final_plot <- plot_data %>% ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
-        scale_x_continuous("Number of checklist items",breaks=0:n_items)+
+        scale_x_continuous(input$xlabtext,breaks=0:n_items)+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = show_legend)+
-        labs(y="Study")
+        labs(y=input$ylabtext)
       
     }
     if(input$chooseViz=="Summary by checklist item"){
       n_studies = length(unique(plot_data$study_label))
       final_plot <- plot_data %>% ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
-        scale_x_continuous("Number of studies",breaks=0:n_studies)+
-        scale_y_discrete("Checklist item",breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
+        scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
+        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = show_legend)
