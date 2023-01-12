@@ -65,7 +65,7 @@ body <- dashboardBody(
                          column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))
     ),
 
-    tabItem(tabName='code',box(title='Code to generate figure',renderPrint('vtout'))),
+    tabItem(tabName='code',column(width=12,title='Code to generate figure',verbatimTextOutput('ggplotCode'))),
     #citation info: 
     tabItem(tabName = 'citation',h3('References'))
   ),
@@ -205,9 +205,26 @@ server <- function(input, output,session) {
   })
   
   
-  output$vtout <- renderPrint({
-    cat("here is some text", 
-        "some", "code", sep = "\n")
+  output$ggplotCode <- renderPrint({
+    cat(paste0("
+    plot_data = data() %>% 
+      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
+      mutate_at('item_score',~factor(.)) %>%
+      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+      
+      item_lookup = plot_data %>% distinct(item_number,item_text)
+      
+      final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
+        geom_tile(colour = 'white', size = 0.5) +
+        scale_x_discrete('",input$xlabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
+        theme(axis.text.x = element_text(angle = 45, hjust=1),
+              panel.background = element_blank(),
+              text = element_text(size=14),
+              legend.title = element_blank(),legend.position = show_legend) +
+        labs(y = '",input$ylabtext,"')+scale_fill_manual(values=cbPalette)
+      "
+    ))
+    
   })
   
   plot_studies <-function(){
