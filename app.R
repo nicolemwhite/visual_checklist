@@ -65,7 +65,11 @@ body <- dashboardBody(
                          column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))
     ),
 
-    tabItem(tabName='code',column(width=12,title='Code to generate figure',verbatimTextOutput('ggplotCode'))),
+    tabItem(tabName='code',
+            box(width=12,title="Full dataset",column(width=12,verbatimTextOutput('ggplotFull')),expanded=T,collapsible = T),
+            box(width=12,title="Summary by study",column(width=12,verbatimTextOutput('ggplotByStudy')),expanded=T,collapsible = T),
+            box(width=12,title="Summary by checklist item",column(width=12,verbatimTextOutput('ggplotByItem')),expanded=T,collapsible = T)
+            ),
     #citation info: 
     tabItem(tabName = 'citation',h3('References'))
   ),
@@ -189,6 +193,9 @@ server <- function(input, output,session) {
   #plot the result only if output$customItem exists
   plot_output<-reactive({plot_studies()})
   
+  
+
+  
   create_custom_plot <- function(){
     plot_colours <- unlist(sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]}))
     
@@ -204,9 +211,20 @@ server <- function(input, output,session) {
     create_custom_plot()
   })
   
+  getplotColours<- function(){
+    colour_list <-unlist((sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]})))
+    out <- paste(lapply(colour_list,function(x) paste0("'",x,"'")),collapse=',')
+    return(paste0("c(",out,")"))
+    
+  }
   
-  output$ggplotCode <- renderPrint({
+  output$ggplotFull <- renderPrint({
     cat(paste0("
+    library(tidyverse)
+    library(vroom)
+    
+    data = vroom(",input$upload$name,", delim = ',',col_types='c')
+    
     plot_data = data() %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
@@ -220,12 +238,75 @@ server <- function(input, output,session) {
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=14),
-              legend.title = element_blank(),legend.position = show_legend) +
-        labs(y = '",input$ylabtext,"')+scale_fill_manual(values=cbPalette)
+              legend.title = element_blank(),legend.position = ",input$legend,") +
+        labs(y = '",input$ylabtext,"')+scale_fill_manual(values=",getplotColours(),")
+        
+      final_plot
       "
     ))
     
   })
+  
+  
+  output$ggplotByStudy <- renderPrint({
+    cat(paste0("
+    library(tidyverse)
+    library(vroom)
+    
+    data = vroom(",input$upload$name,", delim = ',',col_types='c')
+    n_items = length(unique(plot_data$item_number)) 
+    plot_data = data() %>% 
+      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
+      mutate_at('item_score',~factor(.)) %>%
+      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+      
+      item_lookup = plot_data %>% distinct(item_number,item_text)
+      
+      final_plot <- plot_data %>% ggplot(aes(x=study_label,fill=item_score))+
+        geom_bar()+
+        scale_x_discrete('",input$xlabtext,"',breaks=0:n_items)+
+        theme(axis.text.x = element_text(angle = 45, hjust=1),
+              panel.background = element_blank(),
+              text = element_text(size=14),
+              legend.title = element_blank(),legend.position = ",input$legend,") +
+        labs(y = '",input$ylabtext,"')+scale_fill_manual(values=",getplotColours(),")
+        
+        final_plot
+      "
+    ))
+  })
+  
+  output$ggplotByItem <- renderPrint({
+    cat(paste0("
+    library(tidyverse)
+    library(vroom)
+    
+    data = vroom(",input$upload$name,", delim = ',',col_types='c')
+    
+    n_studies = length(unique(plot_data$study_label)) 
+    plot_data = data() %>% 
+      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
+      mutate_at('item_score',~factor(.)) %>%
+      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+      
+      item_lookup = plot_data %>% distinct(item_number,item_text)
+      
+      final_plot <- plot_data %>% ggplot(aes(x=item_number,fill=item_score))+
+        geom_bar()+
+        scale_x_discrete('",input$xlabtext,"',breaks=0:n_studies)+
+        scale_y_discrete('",input$ylabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
+        theme(axis.text.x = element_text(angle = 45, hjust=1),
+              panel.background = element_blank(),
+              text = element_text(size=14),
+              legend.title = element_blank(),legend.position = ",input$legend,") +
+        scale_fill_manual(values=",getplotColours(),")
+        
+        final_plot
+      "
+    ))
+
+  })
+  
   
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
