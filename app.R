@@ -62,7 +62,11 @@ body <- dashboardBody(
                            column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
                            column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
                          ),
-                         column(12,align="center",plotOutput("plot1",width = "auto",height = "800px"))
+            column(12,align="center",plotOutput("plot1",  brush = "plot_brush")),
+            #plotOutput("plot1", brush = "plot_brush"),
+            column(12,align="center",tableOutput("data"))
+            
+            #tableOutput("data")
     ),
 
     tabItem(tabName='code',
@@ -106,6 +110,7 @@ body <- dashboardBody(
                                 background-color: #009FE3;
                                 color: #EAE23B;
                                 
+                                
                                 }
             
                                 /* other links in the sidebarmenu */
@@ -118,6 +123,7 @@ body <- dashboardBody(
                                 /* body */
                                 .content-wrapper, .right-side {
                                 background-color: #FFFFFF;
+                                height: 90vh; overflow-y: auto;
                                 }
                               
                                 /*other text*/
@@ -210,6 +216,15 @@ server <- function(input, output,session) {
     req(plot_output())
     create_custom_plot()
   })
+  
+
+  output$data <- renderTable({
+    #nearPoints(isolate(plot_output()$plot_data), input$plot_click,xvar="item_number",yvar="study_label")
+    brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label")
+  })
+  
+  
+  
   
   getplotColours<- function(){
     colour_list <-unlist((sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]})))
@@ -319,7 +334,8 @@ server <- function(input, output,session) {
     item_lookup = plot_data %>% distinct(item_number,item_text)
     
     if(input$chooseViz=="Full dataset"){
-      final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
+      final_plot <- plot_data %>% 
+        ggplot(aes(x=item_number,y=study_label,fill=item_score))+
         geom_tile(colour = 'white', size = 0.5) +
         scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
@@ -331,7 +347,8 @@ server <- function(input, output,session) {
     
     if(input$chooseViz=="Summary by study"){
       n_items = length(unique(plot_data$item_number))
-      final_plot <- plot_data %>% ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
+      final_plot <- plot_data %>% 
+        ggplot(aes(y=study_label,fill=item_score))+geom_col()+
         scale_x_continuous(input$xlabtext,breaks=0:n_items)+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
@@ -341,7 +358,8 @@ server <- function(input, output,session) {
     }
     if(input$chooseViz=="Summary by checklist item"){
       n_studies = length(unique(plot_data$study_label))
-      final_plot <- plot_data %>% ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
+      final_plot <- plot_data %>% 
+        ggplot(aes(y=item_number,fill=item_score))+geom_col()+
         scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
         scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
