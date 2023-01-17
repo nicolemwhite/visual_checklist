@@ -53,19 +53,20 @@ body <- dashboardBody(
   tabItems(
     # main output window
     tabItem(tabName = "setup",
+            fluidPage(
 
                          fluidRow(
                            column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
                            downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
                            column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
                            column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
-                           column(1,numericInput(inputId = "fheight",label = "Height (in)",min = 1, value = 10)),
-                           column(1,numericInput(inputId = "fwidth",label = "Width (in)",min = 1,value = 15))
+                           column(1,numericInput(inputId = "fheight",label = "Height (px)",min = 100, value = 600)),
+                           column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
                          ),
-            column(12,align="center",plotOutput("plot1",  brush = "plot_brush")),
+            column(12,align="center",plotOutput("plot1",  brush = "plot_brush"))
             #plotOutput("plot1", brush = "plot_brush"),
-            column(12,align="center",tableOutput("data"))
-            
+            #column(12,align="center",tableOutput("data"))
+            )
             #tableOutput("data")
     ),
 
@@ -212,10 +213,13 @@ server <- function(input, output,session) {
     
   }
   
-  output$plot1 <- renderPlot({
-    req(plot_output())
-    create_custom_plot()
-  })
+  output$plot1 <- renderPlot(
+    width = function() input$fwidth,
+    height = function() input$fheight,
+    {
+      req(plot_output())
+      create_custom_plot()
+    })
   
 
   output$data <- renderTable({
@@ -348,7 +352,7 @@ server <- function(input, output,session) {
     if(input$chooseViz=="Summary by study"){
       n_items = length(unique(plot_data$item_number))
       final_plot <- plot_data %>% 
-        ggplot(aes(y=study_label,fill=item_score))+geom_col()+
+        ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
         scale_x_continuous(input$xlabtext,breaks=0:n_items)+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
@@ -359,7 +363,7 @@ server <- function(input, output,session) {
     if(input$chooseViz=="Summary by checklist item"){
       n_studies = length(unique(plot_data$study_label))
       final_plot <- plot_data %>% 
-        ggplot(aes(y=item_number,fill=item_score))+geom_col()+
+        ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
         scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
         scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
