@@ -242,7 +242,7 @@ server <- function(input, output,session) {
     library(tidyverse)
     library(vroom)
     
-    data = vroom(",input$upload$name,", delim = ',',col_types='c')
+    data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     
     plot_data = data() %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
@@ -272,7 +272,7 @@ server <- function(input, output,session) {
     library(tidyverse)
     library(vroom)
     
-    data = vroom(",input$upload$name,", delim = ',',col_types='c')
+    data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     n_items = length(unique(plot_data$item_number)) 
     plot_data = data() %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
@@ -300,7 +300,7 @@ server <- function(input, output,session) {
     library(tidyverse)
     library(vroom)
     
-    data = vroom(",input$upload$name,", delim = ',',col_types='c')
+    data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     
     n_studies = length(unique(plot_data$study_label)) 
     plot_data = data() %>% 
