@@ -244,7 +244,7 @@ server <- function(input, output,session) {
     
     data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     
-    plot_data = data() %>% 
+    plot_data = data %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
@@ -274,7 +274,7 @@ server <- function(input, output,session) {
     
     data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     n_items = length(unique(plot_data$item_number)) 
-    plot_data = data() %>% 
+    plot_data = data %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
@@ -303,7 +303,7 @@ server <- function(input, output,session) {
     data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     
     n_studies = length(unique(plot_data$study_label)) 
-    plot_data = data() %>% 
+    plot_data = data %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
