@@ -26,7 +26,7 @@ legend_positions <- list("No" = 'none',"Yes" = 'top')
 header<- dashboardHeader(title = "Visual reporting checklists", disable = FALSE, titleWidth  = 600)
 ## Sidebar content
 sidebar <- dashboardSidebar(
-  width=600,
+  width=400,
   sidebarMenu(id = "sidebar",
               menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = T),
               #menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=F),
@@ -66,8 +66,8 @@ body <- dashboardBody(
                 column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
               ),
               box(title="Interactive data summary",width=12,
-                  column(12,align='centre',textOutput("summary_text"),style='font-size:12pt;font-weight:bold'),
-                  column(12,align="center",tableOutput("summary_table")),collapsible = T,collapsed = F),
+                  column(12,textOutput("summary_text"),style='font-size:12pt;font-weight:bold;margin-bottom:20px'),
+                  column(12,tableOutput("summary_table")),collapsible = T,collapsed = F),
               column(12,align="center",uiOutput("plot_brush_click"))  
     )
   ),
@@ -293,19 +293,26 @@ server <- function(input, output,session) {
       index_dat <- plot_output()$plot_data %>% arrange(study_label,desc(item_score)) %>%
         group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>%
         mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
+      index_intervals = index_dat %>% group_by(study_label_index,item_score) %>% summarise(a=min(item_score_index),b=max(item_score_index),.groups='drop')
+
       # define xvar, yvar based on plot click
       index_study <- round(as.numeric((input$plot_click$y)))
-      index_score <- round(as.numeric((input$plot_click$x)))
+      index_score <- ceiling(as.numeric((input$plot_click$x)))
       
       #get the corresponding study (yaxis) and item score category (fill)
-      target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
+      #target_study_score = filter(index_intervals,study_label_index==index_study,a<=index_score,index_score<=b)
       
-      summary_dat = semi_join(index_dat,target_study_score,by = c("study_label", "item_score"))
+      target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label_index,item_score)
+      
+      summary_dat = semi_join(index_dat,target_study_score, by = c("study_label_index", "item_score"))
       target_study = unique(summary_dat$study_label)
       target_item_score = unique(summary_dat$item_score)
       
-      tab_output = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+      tab_output = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>%
+        mutate_at('section',~factor(.,levels=unique(.))) %>%
+        group_by(section) %>% summarise('Checklist item(s)' = paste(checklist_item,collapse = '; '),.groups='drop') %>% rename('Section'=section) 
       text_output = paste0(target_study,': ',target_item_score)
+
       }
       
     }
@@ -318,7 +325,7 @@ server <- function(input, output,session) {
         # define xvar, yvar based on plot click; nb: need to reverse map y
         total_items = max(as.numeric(index_dat$item_number))
         index_item <- (total_items-round(as.numeric((input$plot_click$y))))+1
-        index_score <- round(as.numeric((input$plot_click$x)))
+        index_score <- ceiling(as.numeric((input$plot_click$x)))
         
         #issues with round/floor- try setting up reference intervals instead
         #get the corresponding study (yaxis) and item score category (fill)
@@ -328,7 +335,14 @@ server <- function(input, output,session) {
         target_checklist_item = paste0(unique(summary_dat$item_number),'. ',unique(summary_dat$item_text))
         target_item_score = unique(summary_dat$item_score)
         
-        tab_output = summary_dat %>% select(section,study_label) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+        target_section = unique(summary_dat$section)
+        target_studies = paste(summary_dat$study_label,collapse='; ')
+        
+        tab_output = summary_dat %>% group_by(section) %>% summarise('Study label(s)'=paste(study_label,collapse='; ')) %>% rename('Section'=section)
+        
+        #tab_output = tibble(Section=target_section,'Study label(s)'=target_studies)
+        
+        #tab_output = summary_dat %>% select(section,study_label) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
         text_output = paste0(target_checklist_item,': ',target_item_score)
       }
       
@@ -479,31 +493,3 @@ server <- function(input, output,session) {
 }
 shinyApp(ui, server)
 
-
-#not run: point-click for summary bar charts
-# plot_data %>% arrange(study_label,item_score) %>% group_by(study_label) %>%  mutate(item_score_index=row_number())
-# 
-# yvar = 1.75
-# xvar = 15.8
-# 
-# index_dat <- plot_data %>% arrange(study_label,desc(item_score)) %>% 
-#   group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>% 
-#   mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
-# 
-# index_study <- floor(yvar)
-# index_score <- floor(xvar)
-# 
-# #get the corresponding study (yaxis) and item score category (fill)
-# target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
-# 
-# 
-# summary_dat = semi_join(index_dat,target_study_score,by = c("study_label", "item_score"))
-# target_study = unique(summary_dat$study_label)
-# target_item_score = unique(summary_dat$item_score)
-# 
-# summary_dat = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
-# 
-# 
-# output$summary_data_study <- renderTable({
-#   summary_dat
-# })
