@@ -3,6 +3,8 @@ library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(tidyverse)
+library(janitor)
+library(flextable)
 library(colourpicker)
 library(RColorBrewer)
 
@@ -54,34 +56,32 @@ body <- dashboardBody(
     # main output window
     tabItem(tabName = "setup",
             fluidPage(
-
-                         fluidRow(
-                           column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
-                           downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
-                           column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
-                           column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
-                           column(1,numericInput(inputId = "fheight",label = "Height (px)",min = 100, value = 600)),
-                           column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
-                         ),
-            column(12,align="center",plotOutput("plot1",  brush = "plot_brush"))
-            #plotOutput("plot1", brush = "plot_brush"),
-            #column(12,align="center",tableOutput("data"))
-            )
-            #tableOutput("data")
-    ),
-
-    tabItem(tabName='code',
-            box(width=12,title="Full dataset",column(width=12,verbatimTextOutput('ggplotFull')),expanded=T,collapsible = T),
-            box(width=12,title="Summary by study",column(width=12,verbatimTextOutput('ggplotByStudy')),expanded=T,collapsible = T),
-            box(width=12,title="Summary by checklist item",column(width=12,verbatimTextOutput('ggplotByItem')),expanded=T,collapsible = T)
-            ),
-    #citation info: 
-    tabItem(tabName = 'citation',h3('References'))
+              
+              fluidRow(
+                column(3,selectInput(inputId='chooseViz',label='Select plot',choices=c("Full dataset","Summary by study","Summary by checklist item"),selected="Full dataset",multiple = F)),
+                downloadButton("downloadFigure", "Download",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold'),
+                column(1,selectInput("fformat", "Format",c("png" = "png","tiff" = "tiff","jpeg" = "jpeg"), 'png')),
+                column(2,selectInput(inputId = "fres",label = "Resolution (dpi)",c("300 dpi"=300,"600 dpi"=600),selected = "300")),
+                column(1,numericInput(inputId = "fheight",label = "Height (px)",min = 100, value = 600)),
+                column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
+              ),
+              box(title="Data summary",width=12,column(12,align="center",tableOutput("summary_table")),collapsible = T,collapsed = T),
+              column(12,align="center",uiOutput("plot_brush_click"))  
+    )
   ),
   
-  
-  #style elements
-  tags$head(tags$style(HTML('
+  tabItem(tabName='code',
+          box(width=12,title="Full dataset",column(width=12,verbatimTextOutput('ggplotFull')),expanded=T,collapsible = T),
+          box(width=12,title="Summary by study",column(width=12,verbatimTextOutput('ggplotByStudy')),expanded=T,collapsible = T),
+          box(width=12,title="Summary by checklist item",column(width=12,verbatimTextOutput('ggplotByItem')),expanded=T,collapsible = T)
+  ),
+  #citation info: 
+  tabItem(tabName = 'citation',h3('References'))
+),
+
+
+#style elements
+tags$head(tags$style(HTML('
                                 /* logo */
                                 .skin-blue .main-header .logo {
                                 background-color: #003D58;
@@ -130,8 +130,8 @@ body <- dashboardBody(
                                 /*other text*/
                                 .shiny-output-error-validation {color: #EAE23B;font-weight: bold;}
                                 ')))
-  
-  
+
+
 )
 
 
@@ -170,38 +170,67 @@ server <- function(input, output,session) {
            "Summary by checklist item" = c('Number of studies','Checklist item')
     )
   })
+  
 
-  
-  observe({
-    updateTextInput(session,"xlabtext",value=define_axis_labels()[1])
-    updateTextInput(session,"ylabtext",value=define_axis_labels()[2])
-  })
-  
-  observeEvent(input$upload,{
+  getplotColours<- function(){
+    colour_list <-unlist((sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]})))
+    out <- paste(lapply(colour_list,function(x) paste0("'",x,"'")),collapse=',')
+    return(paste0("c(",out,")"))
     
-    #run the main function to create custom UI
-    plot_output<-plot_studies()
-    
-    output$customItem <- renderUI({
-      lapply(1:plot_output$K,function(i) 
-        column(5,colourInput(input=paste0('itemColour',i,sep='_'), 
-                             label=plot_output$item_scores[i],value=colourschemes[[input$colourscheme]][i],
-                             palette = choose_palette(),allowedCols= choose_colours(),closeOnClick = T),style='margin-left:10px'))      
+  }
   
+  plot_studies <-function(){
+    show_legend = legend_positions[[input$legend]]
+    
+    plot_data = data() %>% 
+      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
+      mutate_at('item_score',~factor(.)) %>%
+      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+    
+    item_lookup = plot_data %>% distinct(item_number,item_text)
+    
+    if(input$chooseViz=="Full dataset"){
+      final_plot <- plot_data %>% 
+        ggplot(aes(x=item_number,y=study_label,fill=item_score))+
+        geom_tile(colour = 'white', size = 0.5) +
+        scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
+        theme(axis.text.x = element_text(angle = 45, hjust=1),
+              panel.background = element_blank(),
+              text = element_text(size=14),
+              legend.title = element_blank(),legend.position = show_legend) +
+        labs(y = input$ylabtext)
+    }
+    
+    if(input$chooseViz=="Summary by study"){
+      n_items = length(unique(plot_data$item_number))
+      final_plot <- plot_data %>% 
+        ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
+        scale_x_continuous(input$xlabtext,breaks=0:n_items)+
+        theme(panel.background = element_blank(),
+              text = element_text(size=14),
+              legend.title = element_blank(),legend.position = show_legend)+
+        labs(y=input$ylabtext)
       
-      
-    })
+    }
+    if(input$chooseViz=="Summary by checklist item"){
+      n_studies = length(unique(plot_data$study_label))
+      final_plot <- plot_data %>% 
+        ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
+        scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
+        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
+        theme(panel.background = element_blank(),
+              text = element_text(size=14),
+              legend.title = element_blank(),legend.position = show_legend)
+    }
     
-
     
-    
-  })
+    K <-length(levels(plot_data$item_score))
+    item_scores<-levels(plot_data$item_score)
+    return(list(final_plot=final_plot,plot_data=plot_data,K=K,item_scores=item_scores))
+  }
   
   #plot the result only if output$customItem exists
   plot_output<-reactive({plot_studies()})
-  
-  
-
   
   create_custom_plot <- function(){
     plot_colours <- unlist(sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]}))
@@ -210,32 +239,115 @@ server <- function(input, output,session) {
       return(plot_output()$final_plot+scale_fill_manual(values=plot_colours))
     }
     else{NULL}
-    
   }
-  
-  output$plot1 <- renderPlot(
-    width = function() input$fwidth,
-    height = function() input$fheight,
-    {
-      req(plot_output())
-      create_custom_plot()
-    })
   
 
-  output$data <- renderTable({
-    #nearPoints(isolate(plot_output()$plot_data), input$plot_click,xvar="item_number",yvar="study_label")
-    brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label")
+  
+  
+  
+  observe({
+    updateTextInput(session,"xlabtext",value=define_axis_labels()[1])
+    updateTextInput(session,"ylabtext",value=define_axis_labels()[2])
   })
   
+  observeEvent(input$upload,{
+    #run the main function to create custom UI
+    plot_output<-plot_studies()
+    output$customItem <- renderUI({
+      lapply(1:plot_output$K,function(i) 
+        column(5,colourInput(input=paste0('itemColour',i,sep='_'), 
+                             label=plot_output$item_scores[i],value=colourschemes[[input$colourscheme]][i],
+                             palette = choose_palette(),allowedCols= choose_colours(),closeOnClick = T),style='margin-left:10px'))      
+    })
+  })
   
+ 
+
   
-  
-  getplotColours<- function(){
-    colour_list <-unlist((sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]})))
-    out <- paste(lapply(colour_list,function(x) paste0("'",x,"'")),collapse=',')
-    return(paste0("c(",out,")"))
+  output$plot_brush_click <- renderUI({
+      output$plot1 <- renderPlot(
+        width = function() input$fwidth,
+        height = function() input$fheight,
+        {
+          req(plot_output())
+          create_custom_plot()
+        })
     
+    if(input$chooseViz=='Full dataset'){return(plotOutput("plot1",  brush = "plot_brush"))}
+    else{return(plotOutput("plot1",  click = "plot_click"))}
+  })
+  
+  custom_data_table <- function(){
+    if(input$chooseViz=='Full dataset'){
+      out = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
+        mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(study_label,checklist_item,item_score) %>%
+        rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+    }
+    if(input$chooseViz=='Summary by study'){
+      if(is.null(input$plot_click$x)){out<-NULL}
+      else{
+      index_dat <- plot_output()$plot_data %>% arrange(study_label,desc(item_score)) %>%
+        group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>%
+        mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
+      # define xvar, yvar based on plot click
+      index_study <- floor(as.numeric((input$plot_click$y)))
+      index_score <- floor(as.numeric((input$plot_click$x)))
+      
+      #get the corresponding study (yaxis) and item score category (fill)
+      target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
+      
+      summary_dat = semi_join(index_dat,target_study_score,by = c("study_label", "item_score"))
+      target_study = unique(summary_dat$study_label)
+      target_item_score = unique(summary_dat$item_score)
+      
+      out = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+      }
+      
+    }
+    return(out)
   }
+
+  output$summary_table <- renderTable({custom_data_table()})
+  #output$summary_tag <- renderText() #need additional renderPrint for item score category and study
+  
+  output$dataFullDataset <- renderTable({
+    # #nearPoints(isolate(plot_output()$plot_data), input$plot_click,xvar="item_number",yvar="study_label")
+    # brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>% 
+    #   #customise output
+    #   mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(study_label,checklist_item,item_score) %>% 
+    #   rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+    create_custom_table()
+  })
+  
+  # click_summary_table_study <- function(){
+  #   #set up summary data
+  #   index_dat <- plot_output()$plot_data %>% arrange(study_label,desc(item_score)) %>%
+  #     group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>%
+  #     mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
+  #   # define xvar, yvar based on plot click
+  #   index_study <- floor(input$plot_click$x)
+  #   index_score <- floor(input$plot_click$y)
+  # 
+  #   #get the corresponding study (yaxis) and item score category (fill)
+  #   target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
+  # 
+  #   summary_dat = semi_join(index_dat,target_study_score,by = c("study_label", "item_score"))
+  #   target_study = unique(summary_dat$study_label)
+  #   target_item_score = unique(summary_dat$item_score)
+  # 
+  #   summary_dat = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+  # 
+  #   return(summary_dat)
+  # 
+  # }
+
+  #need function to change what appears in plotOutput()
+  
+  # output$dataStudySummary <- renderTable({
+  #   if (is.null(input$plot1_click$x)) return()
+  #   click_summary_table_study()
+  # })
+  
   
   output$ggplotFull <- renderPrint({
     cat(paste0("
@@ -323,59 +435,10 @@ server <- function(input, output,session) {
         final_plot
       "
     ))
-
+    
   })
   
-  
-  plot_studies <-function(){
-    show_legend = legend_positions[[input$legend]]
-    
-    plot_data = data() %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
-      mutate_at('item_score',~factor(.)) %>%
-      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
-    
-    item_lookup = plot_data %>% distinct(item_number,item_text)
-    
-    if(input$chooseViz=="Full dataset"){
-      final_plot <- plot_data %>% 
-        ggplot(aes(x=item_number,y=study_label,fill=item_score))+
-        geom_tile(colour = 'white', size = 0.5) +
-        scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
-        theme(axis.text.x = element_text(angle = 45, hjust=1),
-              panel.background = element_blank(),
-              text = element_text(size=14),
-              legend.title = element_blank(),legend.position = show_legend) +
-        labs(y = input$ylabtext)
-    }
-    
-    if(input$chooseViz=="Summary by study"){
-      n_items = length(unique(plot_data$item_number))
-      final_plot <- plot_data %>% 
-        ggplot(aes(y=study_label,fill=item_score))+geom_bar()+
-        scale_x_continuous(input$xlabtext,breaks=0:n_items)+
-        theme(panel.background = element_blank(),
-              text = element_text(size=14),
-              legend.title = element_blank(),legend.position = show_legend)+
-        labs(y=input$ylabtext)
-      
-    }
-    if(input$chooseViz=="Summary by checklist item"){
-      n_studies = length(unique(plot_data$study_label))
-      final_plot <- plot_data %>% 
-        ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
-        scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
-        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
-        theme(panel.background = element_blank(),
-              text = element_text(size=14),
-              legend.title = element_blank(),legend.position = show_legend)
-    }
-    
-    
-    K <-length(levels(plot_data$item_score))
-    item_scores<-levels(plot_data$item_score)
-    return(list(final_plot=final_plot,plot_data=plot_data,K=K,item_scores=item_scores))
-  }
+
   
   
   
@@ -387,14 +450,16 @@ server <- function(input, output,session) {
     fres <- as.numeric(input$fres)
     
     # open file dependent on format    
-    if(input$fformat=="png") png(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="in")
-    if(input$fformat=="tiff") tiff(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="in", compression="lzw")
-    if(input$fformat=="jpeg") jpeg(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="in", quality=100)
+    if(input$fformat=="png") png(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="px")
+    if(input$fformat=="tiff") tiff(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="px", compression="lzw")
+    if(input$fformat=="jpeg") jpeg(fn_downloadname_fig(), height=fheight, width=fwidth, res=fres, units="px", quality=100)
     
     g = create_custom_plot()
     print(g)
     dev.off()
   }
+  
+
   # create filename
   fn_downloadname_fig <- reactive({
     
@@ -414,6 +479,37 @@ server <- function(input, output,session) {
     }
   )
   
+
+  
   
 }
 shinyApp(ui, server)
+
+
+#not run: point-click for summary bar charts
+# plot_data %>% arrange(study_label,item_score) %>% group_by(study_label) %>%  mutate(item_score_index=row_number())
+# 
+# yvar = 1.75
+# xvar = 15.8
+# 
+# index_dat <- plot_data %>% arrange(study_label,desc(item_score)) %>% 
+#   group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>% 
+#   mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
+# 
+# index_study <- floor(yvar)
+# index_score <- floor(xvar)
+# 
+# #get the corresponding study (yaxis) and item score category (fill)
+# target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
+# 
+# 
+# summary_dat = semi_join(index_dat,target_study_score,by = c("study_label", "item_score"))
+# target_study = unique(summary_dat$study_label)
+# target_item_score = unique(summary_dat$item_score)
+# 
+# summary_dat = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+# 
+# 
+# output$summary_data_study <- renderTable({
+#   summary_dat
+# })
