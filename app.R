@@ -65,7 +65,9 @@ body <- dashboardBody(
                 column(1,numericInput(inputId = "fheight",label = "Height (px)",min = 100, value = 600)),
                 column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
               ),
-              box(title="Data summary",width=12,column(12,align="center",tableOutput("summary_table")),collapsible = T,collapsed = T),
+              box(title="Interactive data summary",width=12,
+                  column(12,align='centre',textOutput("summary_text"),style='font-size:12pt;font-weight:bold'),
+                  column(12,align="center",tableOutput("summary_table")),collapsible = T,collapsed = F),
               column(12,align="center",uiOutput("plot_brush_click"))  
     )
   ),
@@ -214,10 +216,11 @@ server <- function(input, output,session) {
     }
     if(input$chooseViz=="Summary by checklist item"){
       n_studies = length(unique(plot_data$study_label))
+      
       final_plot <- plot_data %>% 
         ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
         scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
-        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
+        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(paste0(item_lookup$item_number,': ',item_lookup$item_text),50),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = show_legend)
@@ -279,19 +282,20 @@ server <- function(input, output,session) {
   
   custom_data_table <- function(){
     if(input$chooseViz=='Full dataset'){
-      out = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
+      tab_output = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
         mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(study_label,checklist_item,item_score) %>%
         rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+      text_output <-''
     }
     if(input$chooseViz=='Summary by study'){
-      if(is.null(input$plot_click$x)){out<-NULL}
+      if(is.null(input$plot_click$x)){tab_output<-NULL;text_output<-''}
       else{
       index_dat <- plot_output()$plot_data %>% arrange(study_label,desc(item_score)) %>%
         group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>%
         mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
       # define xvar, yvar based on plot click
-      index_study <- floor(as.numeric((input$plot_click$y)))
-      index_score <- floor(as.numeric((input$plot_click$x)))
+      index_study <- round(as.numeric((input$plot_click$y)))
+      index_score <- round(as.numeric((input$plot_click$x)))
       
       #get the corresponding study (yaxis) and item score category (fill)
       target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
@@ -300,53 +304,42 @@ server <- function(input, output,session) {
       target_study = unique(summary_dat$study_label)
       target_item_score = unique(summary_dat$item_score)
       
-      out = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+      tab_output = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+      text_output = paste0(target_study,': ',target_item_score)
       }
       
     }
-    return(out)
+    if(input$chooseViz=='Summary by checklist item'){
+      if(is.null(input$plot_click$x)){tab_output<-NULL;text_output<-''}
+      else{
+        index_dat <- plot_output()$plot_data %>% 
+          arrange(item_number,desc(item_score)) %>% 
+          group_by(item_number) %>%  mutate(item_score_index=row_number()) %>% ungroup() 
+        # define xvar, yvar based on plot click; nb: need to reverse map y
+        total_items = max(as.numeric(index_dat$item_number))
+        index_item <- (total_items-round(as.numeric((input$plot_click$y))))+1
+        index_score <- round(as.numeric((input$plot_click$x)))
+        
+        #get the corresponding study (yaxis) and item score category (fill)
+        target_item_score = filter(index_dat,item_number==index_item,item_score_index==index_score) %>% select(item_number,item_score)
+        
+        summary_dat = semi_join(index_dat,target_item_score,by = c("item_number", "item_score"))
+        target_checklist_item = paste0(unique(summary_dat$item_number),'. ',unique(summary_dat$item_text))
+        target_item_score = unique(summary_dat$item_score)
+        
+        tab_output = summary_dat %>% select(section,study_label) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+        text_output = paste0(target_checklist_item,': ',target_item_score)
+      }
+      
+    }
+    return(list(tab_output = tab_output,text_output=text_output))
   }
 
-  output$summary_table <- renderTable({custom_data_table()})
+  output$summary_table <- renderTable({custom_data_table()$tab_output})
+  output$summary_text <- renderPrint({cat(custom_data_table()$text_output,'\n')})
   #output$summary_tag <- renderText() #need additional renderPrint for item score category and study
-  
-  output$dataFullDataset <- renderTable({
-    # #nearPoints(isolate(plot_output()$plot_data), input$plot_click,xvar="item_number",yvar="study_label")
-    # brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>% 
-    #   #customise output
-    #   mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(study_label,checklist_item,item_score) %>% 
-    #   rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
-    create_custom_table()
-  })
-  
-  # click_summary_table_study <- function(){
-  #   #set up summary data
-  #   index_dat <- plot_output()$plot_data %>% arrange(study_label,desc(item_score)) %>%
-  #     group_by(study_label) %>%  mutate(item_score_index=row_number()) %>% ungroup() %>%
-  #     mutate(study_label_index=as.numeric(factor(study_label,labels=1:length(unique(study_label)))))
-  #   # define xvar, yvar based on plot click
-  #   index_study <- floor(input$plot_click$x)
-  #   index_score <- floor(input$plot_click$y)
-  # 
-  #   #get the corresponding study (yaxis) and item score category (fill)
-  #   target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label,item_score)
-  # 
-  #   summary_dat = semi_join(index_dat,target_study_score,by = c("study_label", "item_score"))
-  #   target_study = unique(summary_dat$study_label)
-  #   target_item_score = unique(summary_dat$item_score)
-  # 
-  #   summary_dat = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(section,checklist_item) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
-  # 
-  #   return(summary_dat)
-  # 
-  # }
 
-  #need function to change what appears in plotOutput()
-  
-  # output$dataStudySummary <- renderTable({
-  #   if (is.null(input$plot1_click$x)) return()
-  #   click_summary_table_study()
-  # })
+
   
   
   output$ggplotFull <- renderPrint({
