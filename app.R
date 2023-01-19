@@ -320,6 +320,7 @@ server <- function(input, output,session) {
         index_item <- (total_items-round(as.numeric((input$plot_click$y))))+1
         index_score <- round(as.numeric((input$plot_click$x)))
         
+        #issues with round/floor- try setting up reference intervals instead
         #get the corresponding study (yaxis) and item score category (fill)
         target_item_score = filter(index_dat,item_number==index_item,item_score_index==index_score) %>% select(item_number,item_score)
         
