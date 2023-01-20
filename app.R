@@ -41,7 +41,8 @@ sidebar <- dashboardSidebar(
                                         column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Custom'))),
                                fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL))),
                                fluidRow(style='margin-left:0px',column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
-                               fluidRow(column(6,radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE),style='margin-left:15px')),
+                               fluidRow(column(6,radioButtons(inputId='legend','Display legend',choices=names(legend_positions),selected = "Yes",inline=TRUE),style='margin-left:15px')),
+
                                fluidRow(uiOutput("customItem"),style='margin-top:10px'),
                                column(6, tags$a(href="http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/", "Hexidecimal colour codes",style='color: #EAE23B'),style='margin-top:0px;margin-left:15px')
               )
@@ -66,7 +67,7 @@ body <- dashboardBody(
                 column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
               ),
               box(title="Figure",width=12,column(12,align="center",uiOutput("plot_brush_click")),collapsible = T,collapsed =F),
-              box(title="Interactive data summary",width=12,
+              box(title=textOutput("data_title"),width=12,
                   column(12,textOutput("summary_text"),style='font-size:12pt;font-weight:bold;margin-bottom:20px'),
                   column(12,tableOutput("summary_table")),collapsible = T,collapsed =F)
               
@@ -79,7 +80,7 @@ body <- dashboardBody(
           box(width=12,title="Summary by checklist item",column(width=12,verbatimTextOutput('ggplotByItem')),expanded=T,collapsible = T)
   ),
   #citation info: 
-  tabItem(tabName = 'citation',h3('References'))
+  tabItem(tabName = 'helplinks',h3('Resources'))
 ),
 
 
@@ -175,6 +176,11 @@ server <- function(input, output,session) {
   })
   
 
+  output$data_title<-renderText({
+    if(is.null(input$upload)){return("Interactive data summary")}
+    else if(input$chooseViz=='Full dataset'){return("Interactive data summary (drag mouse over plot area)")}
+    else{return("Interactive data summary (click plot cell)")}
+  })
   getplotColours<- function(){
     colour_list <-unlist((sapply(1:plot_output()$K, function(i) {input[[paste0("itemColour", i, sep="_")]]})))
     out <- paste(lapply(colour_list,function(x) paste0("'",x,"'")),collapse=',')
@@ -184,7 +190,6 @@ server <- function(input, output,session) {
   
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
-    
     plot_data = data() %>% 
       gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
@@ -199,7 +204,7 @@ server <- function(input, output,session) {
         scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
-              text = element_text(size=14),
+              text = element_text(size=12),
               legend.title = element_blank(),legend.position = show_legend) +
         labs(y = input$ylabtext)
     }
@@ -283,11 +288,14 @@ server <- function(input, output,session) {
   
   custom_data_table <- function(){
     if(input$chooseViz=='Full dataset'){
+      if(is.null(input$plot_brush)){tab_output<-NULL;text_output<-''}
+      else{
       tab_output = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
         mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% mutate_at('section',~factor(.,levels=unique(.))) %>%
         select(section,study_label,checklist_item,item_score) %>% spread(study_label,item_score) %>%
         rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
       text_output <-''
+      }
     }
     if(input$chooseViz=='Summary by study'){
       if(is.null(input$plot_click$x)){tab_output<-NULL;text_output<-''}
