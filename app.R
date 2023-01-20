@@ -23,10 +23,10 @@ themes <- list("Light" = theme_light(),"Minimal" = theme_minimal(),"Black/White"
 legend_positions <- list("No" = 'none',"Yes" = 'top')
 
 
-header<- dashboardHeader(title = "Visual reporting checklists", disable = FALSE, titleWidth  = 600)
+header<- dashboardHeader(title = "Visual reporting checklists", disable = FALSE, titleWidth  = 500)
 ## Sidebar content
 sidebar <- dashboardSidebar(
-  width=400,
+  width=500,
   sidebarMenu(id = "sidebar",
               menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = T),
               #menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=F),
@@ -34,13 +34,13 @@ sidebar <- dashboardSidebar(
               menuItem("References", tabName = "citation", icon = icon("list-alt")),
               conditionalPanel(condition="input.sidebar == 'setup'",
                                fluidRow(
-                                 column(7,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS"))),
-                                 column(4,downloadButton("download_template",style = 'margin-top:35px;background-color:#f9f9f9;font-family: Arial;font-weight: bold'))),
+                                 column(8,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS")),style='margin-left:15px'),
+                                 column(3,downloadButton("download_template",style = 'margin-top:40px;margin-left:-3em;background-color:#f9f9f9;font-family: Arial;font-weight: bold'))),
                                fluidRow(fileInput("upload", "Upload completed template (.csv)", accept = c(".csv")),style='margin-left:15px'),
                                fluidRow(style='margin-left:0px',
                                         column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Custom'))),
-                               fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL)),
-                                        column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
+                               fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL))),
+                               fluidRow(style='margin-left:0px',column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
                                fluidRow(column(6,radioButtons(inputId='legend','Display legend?',choices=names(legend_positions),selected = "Yes",inline=TRUE),style='margin-left:15px')),
                                fluidRow(uiOutput("customItem"),style='margin-top:10px'),
                                column(6, tags$a(href="http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/", "Hexidecimal colour codes",style='color: #EAE23B'),style='margin-top:0px;margin-left:15px')
@@ -65,10 +65,11 @@ body <- dashboardBody(
                 column(1,numericInput(inputId = "fheight",label = "Height (px)",min = 100, value = 600)),
                 column(1,numericInput(inputId = "fwidth",label = "Width (px)",min = 100,value = 1000))
               ),
+              box(title="Figure",width=12,column(12,align="center",uiOutput("plot_brush_click")),collapsible = T,collapsed =F),
               box(title="Interactive data summary",width=12,
                   column(12,textOutput("summary_text"),style='font-size:12pt;font-weight:bold;margin-bottom:20px'),
-                  column(12,tableOutput("summary_table")),collapsible = T,collapsed = F),
-              column(12,align="center",uiOutput("plot_brush_click"))  
+                  column(12,tableOutput("summary_table")),collapsible = T,collapsed =F)
+              
     )
   ),
   
@@ -276,14 +277,15 @@ server <- function(input, output,session) {
           create_custom_plot()
         })
     
-    if(input$chooseViz=='Full dataset'){return(plotOutput("plot1",  brush = "plot_brush"))}
-    else{return(plotOutput("plot1",  click = "plot_click"))}
+    if(input$chooseViz=='Full dataset'){return(plotOutput("plot1",  brush = "plot_brush", height="100%",width="100%"))}
+    else{return(plotOutput("plot1",  click = "plot_click",height="100%",width="100%"))}
   })
   
   custom_data_table <- function(){
     if(input$chooseViz=='Full dataset'){
       tab_output = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
-        mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% select(study_label,checklist_item,item_score) %>%
+        mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% mutate_at('section',~factor(.,levels=unique(.))) %>%
+        select(section,study_label,checklist_item,item_score) %>% spread(study_label,item_score) %>%
         rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
       text_output <-''
     }
@@ -339,10 +341,6 @@ server <- function(input, output,session) {
         target_studies = paste(summary_dat$study_label,collapse='; ')
         
         tab_output = summary_dat %>% group_by(section) %>% summarise('Study label(s)'=paste(study_label,collapse='; ')) %>% rename('Section'=section)
-        
-        #tab_output = tibble(Section=target_section,'Study label(s)'=target_studies)
-        
-        #tab_output = summary_dat %>% select(section,study_label) %>% rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
         text_output = paste0(target_checklist_item,': ',target_item_score)
       }
       
