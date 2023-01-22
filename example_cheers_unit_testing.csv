@@ -16,7 +16,7 @@ Methods,14,Measurement and valuation of resources and costs,Yes,Yes,Yes
 Methods,15,"Currency, price date, and conversion",Yes,Yes,No
 Methods,16,Rationale and description of model,Not applicable,Not applicable,Not applicable
 Methods,17,Analytics and assumptions,Yes,Yes,Yes
-Methods,18,Characterizing heterogeneity,No,Yes,Yes
+Methods,18,Characterizing heterogeneity,No,Yes,Not sure
 Methods,19,Characterizing distributional effects,No,No,No
 Methods,20,Characterizing uncertainty,Yes,Yes,Yes
 Methods,21,Approach to engagement with patients and others affected by the study,No,Maybe,No
@@ -24,6 +24,6 @@ Results,22,Study parameters,Yes,Yes,No
 Results,23,Summary of main results,Yes,Yes,Yes
 Results,24,Effect of uncertainty,Yes,No,Partial
 Results,25,Effect of engagement with patients and others affected by the study,No,No,No
-Discussion,26,"Study findings, limitations, generalizability, and current knowledge",Yes,Yes,Yes
+Discussion,26,"Study findings, limitations, generalizability, and current knowledge",Yes,Not sure,Yes
 Other relevant information,27,Source of funding,No,Yes,Yes
 Other relevant information,28,Conflicts of interest,Yes,Yes,No
