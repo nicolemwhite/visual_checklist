@@ -34,9 +34,8 @@ sidebar <- dashboardSidebar(
   width=500,
   sidebarMenu(id = "sidebar",
               menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = T),
-              #menuItem("Customisation", tabName = "customise", icon = icon("wrench"),startExpanded=F),
               menuItem("Code", tabName = "code", icon = icon("code"),startExpanded = T),
-              menuItem("References", tabName = "citation", icon = icon("list-alt")),
+              menuItem("Useful resources", tabName = "resources", icon = icon("list-alt")),
               conditionalPanel(condition="input.sidebar == 'setup'",
                                fluidRow(
                                  column(8,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS")),style='margin-left:15px'),
@@ -87,7 +86,9 @@ body <- dashboardBody(
             box(width=12,title="Summary by checklist item",column(width=12,verbatimTextOutput('ggplotByItem')),expanded=T,collapsible = T)
     ),
     #citation info: 
-    tabItem(tabName = 'helplinks',h3('Resources'))
+    tabItem(tabName = 'resources',
+            fluidPage(
+              htmltools::tags$iframe(src = "vignette_v1.html", width = '100%',  height = 1000,  style = "border:none;")))
   ),
   
   
@@ -197,9 +198,10 @@ server <- function(input, output,session) {
   
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
+
     plot_data = data() %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text,-item_full_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
-      mutate_at('item_score',~factor(.)) %>%
+      gather(study_label,item_score,-section,-item_number,-item_text,-item_full_text,factor_key = T) %>% 
+      mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
     
     item_lookup = plot_data %>% distinct(item_number,item_text)
