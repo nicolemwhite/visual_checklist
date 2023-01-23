@@ -45,6 +45,7 @@ sidebar <- dashboardSidebar(
                                         column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Custom'))),
                                fluidRow(style='margin-left:0px',column(6,textInput('xlabtext',label='x-axis label',value = NULL))),
                                fluidRow(style='margin-left:0px',column(6,textInput('ylabtext',label='y-axis label',value = NULL))),
+                               fluidRow(style ='margin-left:0px', column(12,radioButtons(inputId='studyorder','Arrange studies in alphabetical order',choices=c("No","Yes"),selected = "No",inline=TRUE))),
                                fluidRow(column(6,radioButtons(inputId='legend','Display legend',choices=names(legend_positions),selected = "Yes",inline=TRUE),style='margin-left:15px')),
                                
                                fluidRow(uiOutput("customItem"),style='margin-top:10px'),
@@ -199,10 +200,14 @@ server <- function(input, output,session) {
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
 
+    
     plot_data = data() %>% 
       gather(study_label,item_score,-section,-item_number,-item_text,-item_full_text,factor_key = T) %>% 
       mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
-      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number))))
+    
+    study_labels = switch(input[['studyorder']],'No' = unique(plot_data$study_label),'Yes' = sort(unique(as.character(plot_data$study_label))))
+    plot_data = plot_data %>% mutate_at('study_label',~factor(.,levels=study_labels))
     
     item_lookup = plot_data %>% distinct(item_number,item_text)
     
