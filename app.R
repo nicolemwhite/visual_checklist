@@ -198,7 +198,7 @@ server <- function(input, output,session) {
   plot_studies <-function(){
     show_legend = legend_positions[[input$legend]]
     plot_data = data() %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
+      gather(study_label,item_score,-section,-item_number,-item_text,-item_full_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
       mutate_at('item_score',~factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
     
