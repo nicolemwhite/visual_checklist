@@ -8,11 +8,6 @@ library(flextable)
 library(colourpicker)
 library(RColorBrewer)
 
-ggplotColours <- function(n = 12, h = c(0, 360) + 15){
-  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
-  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
-}
-
 
 colourschemes <- list('Greyscale' = c("#000000","#737373","#BDBDBD","#D9D9D9","#F0F0F0"),#"Greys",
                       'Accent' = c("#7FC97F","#BEAED4","#FDC086","#FFFF99","#386CB0","#F0027F","#BF5B17","#666666"),
@@ -22,7 +17,6 @@ colourschemes <- list('Greyscale' = c("#000000","#737373","#BDBDBD","#D9D9D9","#
                       "Set2"=brewer.pal(n=8,name="Set2"),
                       "Set3"=brewer.pal(n=8,name="Set3"),
                       'Colour-blind friendly'=  c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"),
-                      #'ggplot2 Default' = ggplotColours(12), #not working
                       'Custom'=c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"))
 themes <- list("Light" = theme_light(),"Minimal" = theme_minimal(),"Black/White" = theme_bw(),"Classic" = theme_classic(),"Gray"=theme_gray())
 legend_positions <- list("No" = 'none',"Yes" = 'top')
