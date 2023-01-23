@@ -206,7 +206,7 @@ server <- function(input, output,session) {
       mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
       mutate_at('item_number',~factor(.,levels=1:length(unique(item_number))))
     
-    study_labels = switch(input[['studyorder']],'No' = unique(plot_data$study_label),'Yes' = sort(unique(as.character(plot_data$study_label))))
+    study_labels = switch(input[['studyorder']],'No' = rev(unique(plot_data$study_label)),'Yes' = sort(unique(as.character(plot_data$study_label)),decreasing=T))
     plot_data = plot_data %>% mutate_at('study_label',~factor(.,levels=study_labels))
     
     item_lookup = plot_data %>% distinct(item_number,item_text)
@@ -312,10 +312,12 @@ server <- function(input, output,session) {
     if(input$chooseViz=='Full dataset'){
       if(is.null(input$plot_brush)){tab_output<-NULL;text_output<-''}
       else{
+
         tab_output = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
           mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% mutate_at('section',~factor(.,levels=unique(.))) %>%
+          mutate_at('study_label',~factor(.,levels=unique(.))) %>%
           select(section,study_label,checklist_item,item_score) %>% spread(study_label,item_score) %>%
-          rename_with(function(x) make_clean_names(x,case='title'),.cols=everything())
+          rename_with(function(x) make_clean_names(x,case='title'),.cols=everything()) 
         text_output <-''
       }
     }
