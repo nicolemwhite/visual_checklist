@@ -74,7 +74,9 @@ body <- dashboardBody(
               box(title="Figure",width=12,column(12,align="center",uiOutput("plot_brush_click")),collapsible = T,collapsed =F),
               box(title=textOutput("data_title"),width=12,
                   column(12,textOutput("summary_text"),style='font-size:12pt;font-weight:bold;margin-bottom:20px'),
-                  column(12,tableOutput("summary_table")),collapsible = T,collapsed =F)
+                  column(12,tableOutput("summary_table")),
+                  column(6,downloadButton("downloadTable", "Download table",style='background-color:	#f9f9f9;font-family: Arial;font-weight: bold')),
+                  collapsible = T,collapsed =T)
               
             )
     ),
@@ -507,7 +509,27 @@ server <- function(input, output,session) {
     }
   )
   
+  #download outputs
+  #table - to do
+  fn_download_tab <- function(){
+    ftab <- custom_data_table()$tab_output %>% flextable() %>% fontsize(size=9,part=c("all")) %>% width(width=1)
+    save_as_docx(ftab,path=fn_downloadname_tab())
+  }
+  # create filename
+  fn_downloadname_tab <- reactive({
+    fname = "checklist_table" #isolate(input$tab_fname)
+    filename <- paste0(fname,".docx",sep="")
+    return(filename)
+  })
   
+  # download handler
+  output$downloadTable<- downloadHandler(
+    filename = fn_downloadname_tab,
+    content = function(file) {
+      fn_download_tab()
+      file.copy(fn_downloadname_tab(), file, overwrite=T)
+    }
+  ) 
   
   
 }
