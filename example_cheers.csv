@@ -1,29 +1,37 @@
-section,item_number,item_text,Study 1,Study 2,Study 3
-Title,1,Title,Yes,Yes,Yes
-Abstract,2,Abstract,Yes,Yes,Yes
-Introduction,3,Background and objectives,Yes,Yes,Yes
-Methods,4,Health economic analysis plan,No,No,Maybe
-Methods,5,Study population,Yes,Yes,Yes
-Methods,6,Setting and location,Yes,Yes,Yes
-Methods,7,Comparators,Yes,Yes,Yes
-Methods,8,Perspective,Yes,Yes,Partial
-Methods,9,Time horizon,Yes,Yes,Yes
-Methods,10,Discount rate,Not applicable,Not applicable,Not applicable
-Methods,11,Selection of outcomes,Not applicable,Yes,Not applicable
-Methods,12,Measurement of outcomes,Not applicable,Yes,Not applicable
-Methods,13,Valuation of outcomes,Not applicable,Not applicable,Not applicable
-Methods,14,Measurement and valuation of resources and costs,Yes,Yes,Yes
-Methods,15,"Currency, price date, and conversion",Yes,Yes,No
-Methods,16,Rationale and description of model,Not applicable,Not applicable,Not applicable
-Methods,17,Analytics and assumptions,Yes,Yes,Yes
-Methods,18,Characterizing heterogeneity,No,Yes,Yes
-Methods,19,Characterizing distributional effects,No,No,No
-Methods,20,Characterizing uncertainty,Yes,Yes,Yes
-Methods,21,Approach to engagement with patients and others affected by the study,No,Maybe,No
-Results,22,Study parameters,Yes,Yes,No
-Results,23,Summary of main results,Yes,Yes,Yes
-Results,24,Effect of uncertainty,Yes,No,Partial
-Results,25,Effect of engagement with patients and others affected by the study,No,No,No
-Discussion,26,"Study findings, limitations, generalizability, and current knowledge",Yes,Yes,Yes
-Other relevant information,27,Source of funding,No,Yes,Yes
-Other relevant information,28,Conflicts of interest,Yes,Yes,No
+section,item_number,item_text,full_item,Study 1,Study 2,Study 3,Study 4,Study 5,Study 6,Study 7,Study 8,Study 9,Study 10,Study 11,Study 12,Study 13,Study 14,Study 15,,,,,
+Title,1,Title,Identify the study as an economic evaluation and specify the interventions being compared.,Unclear,Yes,Not applicable,No,Unclear,No,Not applicable,Yes,Unclear,No,No,Unclear,Not applicable,Unclear,No,,,,,
+Abstract,2,Abstract,"Provide a structured summary that highlights context, key methods, results and alternative analyses.",Yes,No,Yes,Unclear,Yes,No,Unclear,No,Unclear,Unclear,Yes,Yes,Yes,Unclear,Yes,,,,,
+Introduction,3,Background and objectives,"Give the context for the study, the study question and its practical relevance for decision making in policy or practice.",Yes,Yes,Yes,Yes,Unclear,Yes,No,Yes,No,Not applicable,Not applicable,Not applicable,Not applicable,Yes,Not applicable,,,,,
+Methods,4,Health economic analysis plan,Indicate whether a health economic analysis plan was developed and where available.,No,Yes,Not applicable,No,No,No,Unclear,Unclear,Unclear,Yes,No,Yes,Unclear,Yes,Not applicable,,,,,
+Methods,5,Study population,"Describe characteristics of the study population (such as age range, demographics, socioeconomic, or clinical characteristics).",Unclear,Not applicable,Not applicable,Not applicable,Not applicable,Not applicable,Not applicable,Unclear,No,Not applicable,Yes,Not applicable,No,Unclear,Not applicable,,,,,
+Methods,6,Setting and location,Provide relevant contextual information that may influence findings.,No,Unclear,Yes,Not applicable,Yes,Not applicable,Unclear,No,Yes,Not applicable,Yes,Unclear,Unclear,Not applicable,Unclear,,,,,
+Methods,7,Comparators,Describe the interventions or strategies being compared and why chosen.,Yes,No,Yes,Yes,Unclear,Yes,Unclear,Yes,No,Unclear,No,Unclear,Unclear,Not applicable,Unclear,,,,,
+Methods,8,Perspective,State the perspective(s) adopted by the study and why chosen.,Unclear,Not applicable,Yes,Yes,No,Yes,No,Unclear,No,No,No,Unclear,No,Not applicable,Yes,,,,,
+Methods,9,Time horizon,State the time horizon for the study and why appropriate.,No,Yes,No,Yes,Not applicable,Unclear,Not applicable,Unclear,No,Not applicable,Unclear,Unclear,No,No,No,,,,,
+Methods,10,Discount rate,Report the discount rate(s) and reason chosen.,Not applicable,Yes,Unclear,Yes,Yes,Yes,No,No,Yes,Unclear,No,Yes,Not applicable,Not applicable,Not applicable,,,,,
+Methods,11,Selection of outcomes,Describe what outcomes were used as the measure(s) of benefit(s) and harm(s).,Not applicable,Not applicable,Not applicable,No,No,Yes,Not applicable,No,No,Unclear,Yes,Yes,Unclear,No,Not applicable,,,,,
+Methods,12,Measurement of outcomes,Describe how outcomes used to capture benefit(s) and harm(s) were measured.,Not applicable,Yes,Yes,No,Not applicable,Not applicable,Not applicable,Yes,Unclear,Yes,Yes,Unclear,Yes,Unclear,Unclear,,,,,
+Methods,13,Valuation of outcomes,Describe the population and methods used to measure and value outcomes.,Yes,No,Yes,No,Not applicable,No,Not applicable,No,Yes,Unclear,Yes,Yes,Unclear,Unclear,Yes,,,,,
+Methods,14,Measurement and valuation of resources and costs,Describe how costs were valued.,Not applicable,Not applicable,Not applicable,No,Not applicable,Not applicable,Yes,Yes,Not applicable,Not applicable,Unclear,Not applicable,No,Unclear,No,,,,,
+Methods,15,"Currency, price date, and conversion","Report the dates of the estimated resource quantities and unit costs, plus the currency and year of conversion.",Yes,Yes,Not applicable,Unclear,Not applicable,Unclear,Unclear,Unclear,Unclear,Yes,No,Unclear,Not applicable,No,Unclear,,,,,
+Methods,16,Rationale and description of model,"If modelling is used, describe in detail and why used. Report if the model is publicly available and where it can be accessed.",Yes,Unclear,No,No,Unclear,Not applicable,Yes,Unclear,Unclear,Unclear,Yes,Unclear,Unclear,Not applicable,Yes,,,,,
+Methods,17,Analytics and assumptions,"Describe any methods for analysing or statistically transforming data, any extrapolation methods, and approaches for validating any model used.",Not applicable,Yes,Yes,No,Yes,Yes,Unclear,Yes,No,No,Yes,Unclear,Yes,Not applicable,Unclear,,,,,
+Methods,18,Characterizing heterogeneity,Describe any methods used for estimating how the results of the study vary for sub-groups.,No,Not applicable,No,No,Not applicable,Not applicable,No,Yes,Not applicable,Yes,Unclear,Yes,Not applicable,Yes,No,,,,,
+Methods,19,Characterizing distributional effects,Describe how impacts are distributed across different individuals or adjustments made to reflect priority populations.,Yes,Unclear,Yes,Yes,Yes,Not applicable,No,Unclear,Not applicable,Unclear,Not applicable,Yes,Unclear,Not applicable,Unclear,,,,,
+Methods,20,Characterizing uncertainty,Describe methods to characterize any sources of uncertainty in the analysis.,Yes,Unclear,No,Yes,Yes,No,Unclear,No,Yes,Unclear,No,Not applicable,No,No,Not applicable,,,,,
+Methods,21,Approach to engagement with patients and others affected by the study,"Describe any approaches to engage patients or service recipients, the general public, communities, or stakeholders (e.g., clinicians or payers) in the design of the study.",No,No,Not applicable,Unclear,Not applicable,Yes,No,Not applicable,No,Unclear,Yes,No,Yes,Unclear,Yes,,,,,
+Results,22,Study parameters,"Report all analytic inputs (e.g., values, ranges, references) including uncertainty or distributional assumptions.",Yes,Yes,Yes,Yes,Yes,Unclear,Not applicable,No,No,No,Yes,No,No,Yes,Yes,,,,,
+Results,23,Summary of main results,Report the mean values for the main categories of costs and outcomes of interest and summarise them in the most appropriate overall measure.,Not applicable,No,Not applicable,Yes,Unclear,No,Yes,Unclear,Unclear,No,No,No,Yes,Not applicable,No,,,,,
+Results,24,Effect of uncertainty,"Describe how uncertainty about analytic judgments, inputs, or projections affect findings. Report the effect of choice of discount rate and time horizon, if applicable.",Not applicable,Unclear,Unclear,Not applicable,Not applicable,Unclear,Unclear,Not applicable,Yes,Not applicable,Not applicable,No,Not applicable,Yes,Yes,,,,,
+Results,25,Effect of engagement with patients and others affected by the study,"Report on any difference patient/service recipient, general public, community, or stakeholder involvement made to the approach or findings of the study",No,No,Not applicable,Yes,No,Not applicable,No,No,Not applicable,Yes,No,Unclear,Unclear,No,Yes,,,,,
+Discussion,26,"Study findings, limitations, generalizability, and current knowledge","Report key findings, limitations, ethical or equity considerations not captured, and how these could impact patients, policy, or practice",Not applicable,Yes,Yes,Unclear,No,Not applicable,Unclear,Yes,Unclear,Unclear,Yes,Unclear,Yes,Not applicable,Yes,,,,,
+Other relevant information,27,Source of funding,"Describe how the study was funded and any role of the funder in the identification, design, conduct, and reporting of the analysis",Yes,Unclear,Unclear,Not applicable,No,Yes,No,No,No,Not applicable,Unclear,Not applicable,Yes,Not applicable,No,,,,,
+Other relevant information,28,Conflicts of interest,Report authors conflicts of interest according to journal or International Committee of Medical Journal Editors requirements.,Yes,Not applicable,Not applicable,No,No,Not applicable,No,No,No,Yes,Unclear,Yes,Unclear,No,Unclear,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,
