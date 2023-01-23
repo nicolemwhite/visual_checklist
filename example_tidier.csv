@@ -1,0 +1,13 @@
+section,item_number,item_text,item_full,Study 1,Study 2,Study 3
+Brief name,1,,Provide the name or a phrase that describes the intervention.,Yes,No,No
+Why,2,,"Describe any rationale, theory, or goal of the elements essential to the intervention.",No,No,Not applicable
+What,3,,"Materials: Describe any physical or informational materials used in the intervention, including those provided to participants or used in intervention delivery or in training of intervention providers. Provide information on where the materials can be accessed (e.g. online appendix, URL).",Yes,No,Yes
+What,4,,"Procedures: Describe each of the procedures, activities, and/or processes used in the intervention, including any enabling or support activities.",No,Yes,Yes
+Who provided,5,,"For each category of intervention provider (e.g. psychologist, nursing assistant), describe their expertise, background and any specific training given.",Yes,Yes,No
+How,6,,"Describe the modes of delivery (e.g. face-to-face or by some other mechanism, such as internet or telephone) of the intervention and whether it was provided individually or in a group.",Yes,No,No
+Where,7,,"Describe the type(s) of location(s) where the intervention occurred, including any necessary infrastructure or relevant features.",Not applicable,No,Yes
+When and how much,8,,"Describe the number of times the intervention was delivered and over what period of time including the number of sessions, their schedule, and their duration, intensity or dose.",No,No,Yes
+Tailoring,9,,"If the intervention was planned to be personalised, titrated or adapted, then describe what, why, when, and how.",Yes,No,Yes
+Modifications,10,,"If the intervention was modified during the course of the study, describe the changes (what, why, when, and how).",Yes,Yes,No
+How well,11,,"Planned: If intervention adherence or fidelity was assessed, describe how and by whom, and if any strategies were used to maintain or improve fidelity, describe them.",Not applicable,Yes,Not applicable
+How well,12,,"Actual: If intervention adherence or fidelity was assessed, describe the extent to which the intervention was delivered as planned.",Not applicable,Yes,Not applicable

@@ -1,0 +1,10 @@
+section,item_number,item_text,item_full,Study 1,Study 2,Study 3
+Risk of bias,1,Participants,,No,Not applicable,No
+Risk of bias,2,Predictors,,Yes,Yes,Not applicable
+Risk of bias,3,Outcome,,Unclear,Unclear,Unclear
+Risk of bias,4,Analysis,,No,Not applicable,Not applicable
+Applicability,5,Participants,,No,Yes,Not applicable
+Applicability,6,Predictors,,No,Unclear,Yes
+Applicability,7,Outcome,,Unclear,No,Yes
+Overall,8,Risk of bias,,Not applicable,No,Yes
+Overall,9,Applicability,,Yes,Yes,No

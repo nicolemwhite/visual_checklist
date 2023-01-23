@@ -1,0 +1,47 @@
+section,item_number,item_text,item_full,Study 1,Study 2,Study 3
+Title and abstract,1a,Indicate the study's design,Indicate the study’s design with a commonly used term in the title or the abstract,No,Not applicable,Unclear
+Title and abstract,1b,Provide a balanced summary,Provide in the abstract an informative and balanced summary of what was done and what was found,No,Yes,Yes
+Introduction,2,Background/rationale,Explain the scientific background and rationale for the investigation being reported,No,Yes,No
+Introduction,3,Objectives,"State specific objectives, including any prespecified hypotheses",No,Not applicable,Yes
+Methods,4,Study design,Present key elements of study design early in the paper,Not applicable,Not applicable,No
+Methods,5,Setting,"Describe the setting, locations, and relevant dates, including periods of recruitment, exposure, follow-up, and data collection",Unclear,Not applicable,No
+Methods,6a,Participants,"Give the eligibility criteria, and the sources and methods of selection of participants. Describe methods of follow-up",Yes,Unclear,Not applicable
+Methods,6b,Participants,"For matched studies, give matching criteria and number of exposed and unexposed",Not applicable,Unclear,Yes
+Methods,7,Variables,"Clearly define all outcomes, exposures, predictors, potential confounders, and effect modifiers. Give diagnostic criteria, if applicable",Yes,Not applicable,Yes
+Methods,8,Data sources/ measurement,"For each variable of interest, give sources of data and details of methods of assessment (measurement). Describe comparability of assessment methods if there is more than one group",Unclear,Yes,Yes
+Methods,9,Bias,Describe any efforts to address potential sources of bias,Not applicable,Unclear,Yes
+Methods,10,Study size,Explain how the study size was arrived at,No,Yes,Not applicable
+Methods,11,Quantitative variables,"Explain how quantitative variables were handled in the analyses. If applicable, describe which groupings were chosen and why",No,Yes,Unclear
+Methods,12a,Statistical methods,"Describe all statistical methods, including those used to control for confounding",Unclear,Unclear,Yes
+Methods,12b,Statistical methods,Describe any methods used to examine subgroups and interactions,Not applicable,Yes,No
+Methods,12c,Statistical methods,Explain how missing data were addressed,Yes,Unclear,Unclear
+Methods,12d,Statistical methods,"If applicable, explain how loss to follow-up was addressed",Yes,Unclear,Yes
+Methods,12e,Statistical methods,Describe any sensitivity analyses,Unclear,Not applicable,Not applicable
+Results,13a,Participants,"Report numbers of individuals at each stage of study—eg numbers potentially eligible, examined for eligibility, confirmed eligible, included in the study, completing follow-up, and analysed",No,Unclear,Yes
+Results,13b,Participants,Give reasons for non-participation at each stage,Not applicable,No,No
+Results,13c,Participants,Consider use of a flow diagram,Not applicable,Yes,No
+Results,14a,Descriptive data,"Give characteristics of study participants (eg demographic, clinical, social) and information on exposures and potential confounders",Not applicable,Unclear,Not applicable
+Results,14b,Descriptive data,Indicate number of participants with missing data for each variable of interest,Yes,No,Yes
+Results,14c,Descriptive data,"Summarise follow-up time (eg, average and total amount)",No,Unclear,Yes
+Results,15,Outcome data,Report numbers of outcome events or summary measures over time,Yes,Not applicable,Unclear
+Results,16a,Main results,"Give unadjusted estimates and, if applicable, confounder-adjusted estimates and their precision (eg, 95% confidence interval). Make clear which confounders were adjusted for and why they were included",Yes,Not applicable,Unclear
+Results,16b,Main results,Report category boundaries when continuous variables were categorized,No,Unclear,Not applicable
+Results,16c,Main results,"If relevant, consider translating estimates of relative risk into absolute risk for a meaningful time period",Unclear,Yes,No
+Results,17,Other analyses,"Report other analyses done—eg analyses of subgroups and interactions, and sensitivity analyses",No,Yes,No
+Discussion,18,Key results,Summarise key results with reference to study objectives,No,Unclear,Unclear
+Discussion,19,Limitations,"Discuss limitations of the study, taking into account sources of potential bias or imprecision. Discuss both direction and magnitude of any potential bias",Unclear,Not applicable,Unclear
+Discussion,20,Interpretation,"Give a cautious overall interpretation of results considering objectives, limitations, multiplicity of analyses, results from similar studies, and other relevant evidence",Unclear,No,Yes
+Discussion,21,Generalisability,Discuss the generalisability (external validity) of the study results,Yes,Unclear,Yes
+Other information,22,Funding,"Give the source of funding and the role of the funders for the present study and, if applicable, for the original study on which the present article is based",No,Unclear,Unclear
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
+,,,,,,
