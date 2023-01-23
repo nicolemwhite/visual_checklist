@@ -38,7 +38,7 @@ sidebar <- dashboardSidebar(
               menuItem("Useful resources", tabName = "resources", icon = icon("list-alt")),
               conditionalPanel(condition="input.sidebar == 'setup'",
                                fluidRow(
-                                 column(8,selectInput(inputId="template",label='Select template (TODO)',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS")),style='margin-left:15px'),
+                                 column(8,selectInput(inputId="template",label='Select template',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS")),style='margin-left:15px'),
                                  column(3,downloadButton("download_template",style = 'margin-top:40px;margin-left:-3em;background-color:#f9f9f9;font-family: Arial;font-weight: bold'))),
                                fluidRow(fileInput("upload", "Upload completed template (.csv)", accept = c(".csv")),style='margin-left:15px'),
                                fluidRow(style='margin-left:0px',
@@ -202,20 +202,21 @@ server <- function(input, output,session) {
 
     
     plot_data = data() %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text,-item_full_text,factor_key = T) %>% 
+      mutate(item_number = row_number()) %>%
+      gather(study_label,item_score,-section,-item_number,-checklist_item,-item_full_text,factor_key = T) %>% 
       mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
-      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number))))
+      mutate_at('item_number',~factor(.)) 
     
     study_labels = switch(input[['studyorder']],'No' = rev(unique(plot_data$study_label)),'Yes' = sort(unique(as.character(plot_data$study_label)),decreasing=T))
     plot_data = plot_data %>% mutate_at('study_label',~factor(.,levels=study_labels))
     
-    item_lookup = plot_data %>% distinct(item_number,item_text)
+    item_lookup = plot_data %>% distinct(item_number,checklist_item)
     
     if(input$chooseViz=="Full dataset"){
       final_plot <- plot_data %>% 
         ggplot(aes(x=item_number,y=study_label,fill=item_score))+
         geom_tile(colour = 'white', size = 0.5) +
-        scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
+        scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$checklist_item,50))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=12),
@@ -240,7 +241,7 @@ server <- function(input, output,session) {
       final_plot <- plot_data %>% 
         ggplot(aes(y=item_number,fill=item_score))+geom_bar()+
         scale_x_continuous(input$xlabtext,breaks=0:n_studies)+
-        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(paste0(item_lookup$item_number,': ',item_lookup$item_text),50),limits = rev(item_lookup$item_number))+
+        scale_y_discrete(input$ylabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$checklist_item,50),limits = rev(item_lookup$item_number))+
         theme(panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = show_legend)
@@ -314,7 +315,8 @@ server <- function(input, output,session) {
       else{
 
         tab_output = brushedPoints(isolate(plot_output()$plot_data), input$plot_brush,xvar="item_number",yvar="study_label") %>%
-          mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% mutate_at('section',~factor(.,levels=unique(.))) %>%
+          #mutate(checklist_item=paste0(item_number,'. ',item_text)) %>% 
+          mutate_at('section',~factor(.,levels=unique(.))) %>%
           mutate_at('study_label',~factor(.,levels=unique(.))) %>%
           select(section,study_label,checklist_item,item_score) %>% spread(study_label,item_score) %>%
           rename_with(function(x) make_clean_names(x,case='title'),.cols=everything()) 
@@ -342,7 +344,8 @@ server <- function(input, output,session) {
         target_study = unique(summary_dat$study_label)
         target_item_score = unique(summary_dat$item_score)
         
-        tab_output = summary_dat %>% mutate(checklist_item=paste0(item_number,'. ',item_text)) %>%
+        tab_output = summary_dat %>% 
+          #mutate(checklist_item=paste0(item_number,'. ',item_text)) %>%
           mutate_at('section',~factor(.,levels=unique(.))) %>%
           group_by(section) %>% summarise('Checklist item(s)' = paste(checklist_item,collapse = '; '),.groups='drop') %>% rename('Section'=section) 
         text_output = paste0(target_study,': ',target_item_score)
@@ -366,7 +369,7 @@ server <- function(input, output,session) {
         target_item_score = filter(index_dat,item_number==index_item,item_score_index==index_score) %>% select(item_number,item_score)
         
         summary_dat = semi_join(index_dat,target_item_score,by = c("item_number", "item_score"))
-        target_checklist_item = paste0(unique(summary_dat$item_number),'. ',unique(summary_dat$item_text))
+        target_checklist_item = paste0(unique(summary_dat$checklist_item))
         target_item_score = unique(summary_dat$item_score)
         
         target_section = unique(summary_dat$section)
@@ -396,15 +399,16 @@ server <- function(input, output,session) {
     data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     
     plot_data = data %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
-      mutate_at('item_score',~factor(.)) %>%
-      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
-      
-      item_lookup = plot_data %>% distinct(item_number,item_text)
+      mutate(item_number = row_number()) %>%
+      gather(study_label,item_score,-section,-item_number,-checklist_item,-item_full_text,factor_key = T) %>% 
+      mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
+      mutate_at('item_number',~factor(.)) 
+
+      item_lookup = plot_data %>% distinct(item_number,checklist_item)
       
       final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
         geom_tile(colour = 'white', size = 0.5) +
-        scale_x_discrete('",input$xlabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40))+
+        scale_x_discrete('",input$xlabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$checklist_item,50))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=14),
@@ -426,11 +430,12 @@ server <- function(input, output,session) {
     data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     n_items = length(unique(plot_data$item_number)) 
     plot_data = data %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
-      mutate_at('item_score',~factor(.)) %>%
-      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+      mutate(item_number = row_number()) %>%
+      gather(study_label,item_score,-section,-item_number,-checklist_item,-item_full_text,factor_key = T) %>% 
+      mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
+      mutate_at('item_number',~factor(.)) 
       
-      item_lookup = plot_data %>% distinct(item_number,item_text)
+      item_lookup = plot_data %>% distinct(item_number,checklist_item)
       
       final_plot <- plot_data %>% ggplot(aes(x=study_label,fill=item_score))+
         geom_bar()+
@@ -441,7 +446,7 @@ server <- function(input, output,session) {
               legend.title = element_blank(),legend.position = ",input$legend,") +
         labs(y = '",input$ylabtext,"')+scale_fill_manual(values=",getplotColours(),")
         
-        final_plot
+      final_plot
       "
     ))
   })
@@ -455,23 +460,24 @@ server <- function(input, output,session) {
     
     n_studies = length(unique(plot_data$study_label)) 
     plot_data = data %>% 
-      gather(study_label,item_score,-section,-item_number,-item_text) %>% mutate_at('item_score',~replace_na(.,'Missing')) %>%
-      mutate_at('item_score',~factor(.)) %>%
-      mutate_at('item_number',~factor(.,levels=1:length(unique(item_number)))) 
+      mutate(item_number = row_number()) %>%
+      gather(study_label,item_score,-section,-item_number,-checklist_item,-item_full_text,factor_key = T) %>% 
+      mutate_at('item_score',~replace_na(.,'Missing') %>% factor(.)) %>%
+      mutate_at('item_number',~factor(.)) 
       
-      item_lookup = plot_data %>% distinct(item_number,item_text)
+      item_lookup = plot_data %>% distinct(item_number,checklist_item)
       
       final_plot <- plot_data %>% ggplot(aes(x=item_number,fill=item_score))+
         geom_bar()+
         scale_x_discrete('",input$xlabtext,"',breaks=0:n_studies)+
-        scale_y_discrete('",input$ylabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$item_text,40),limits = rev(item_lookup$item_number))+
+        scale_y_discrete('",input$ylabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$checklist_item,40),limits = rev(item_lookup$item_number))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
               text = element_text(size=14),
               legend.title = element_blank(),legend.position = ",input$legend,") +
         scale_fill_manual(values=",getplotColours(),")
         
-        final_plot
+      final_plot
       "
     ))
     
@@ -526,7 +532,7 @@ server <- function(input, output,session) {
   }
   # create filename
   fn_downloadname_tab <- reactive({
-    fname = "checklist_table" #isolate(input$tab_fname)
+    fname = "checklist_table"
     filename <- paste0(fname,".docx",sep="")
     return(filename)
   })
@@ -539,6 +545,30 @@ server <- function(input, output,session) {
       file.copy(fn_downloadname_tab(), file, overwrite=T)
     }
   ) 
+  
+  #downlaod template
+  fn_downloadname_template <- reactive({
+    if(input$template=='CHEERS') filename <- 'data/template_cheers.xlsx'
+    if(input$template=='STROBE') filename <- 'data/template_strobe.xlsx'
+    if(input$template=='TRIPOD') filename <- 'data/template_tripod.xlsx'
+    if(input$template=='PROBAST') filename <- 'data/template_probast.xlsx'
+    if(input$template=='TIDierR') filename <- 'data/template_tidier.xlsx'
+    return(filename)
+  })
+  
+  output$download_template<-downloadHandler(
+    filename = function(){
+      switch(input$template,
+        'CHEERS' = 'template_cheers.xlsx',
+        'STROBE' = 'template_strobe.xlsx',
+        'TRIPOD' = 'template_tripod.xlsx',
+        'PROBAST' = 'template_probast.xlsx',
+        'TIDierR' = 'template_tidier.xlsx'
+      )},
+    
+    content = function(file) {
+      file.copy(fn_downloadname_template(),file)
+    })
   
   
 }
