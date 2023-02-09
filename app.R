@@ -27,13 +27,11 @@ header<- dashboardHeader(title = "Visual reporting checklists", disable = FALSE,
 sidebar <- dashboardSidebar(
   width=500,
   sidebarMenu(id = "sidebar",
+              menuItem("Home",tabName='home',icon=icon("home"),startExpanded = T),
               menuItem("Application", tabName = "setup", icon = icon("list"),startExpanded = T),
               menuItem("Code", tabName = "code", icon = icon("code"),startExpanded = T),
               menuItem("Useful resources", tabName = "resources", icon = icon("list-alt")),
               conditionalPanel(condition="input.sidebar == 'setup'",
-                               fluidRow(
-                                 column(8,selectInput(inputId="template",label='Select template',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS")),style='margin-left:15px'),
-                                 column(3,downloadButton("download_template",style = 'margin-top:40px;margin-left:-3em;background-color:#f9f9f9;font-family: Arial;font-weight: bold'))),
                                fluidRow(fileInput("upload", "Upload completed template (.csv)", accept = c(".csv")),style='margin-left:15px'),
                                fluidRow(style='margin-left:0px',
                                         column(6,selectInput('colourscheme',label='Choose colour scheme',choices = names(colourschemes),selected = 'Custom'))),
@@ -53,6 +51,27 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   
   tabItems(
+    tabItem(tabName='home',
+            
+            p("This Shiny application allows users to summarise results from reporting checklists"),
+            br(),
+            p("To get started, download a template from the dropbox selection below:"),
+            fluidRow(
+              column(3,selectInput(inputId="template",label='Select template',choices=c("CHEERS","STROBE","TRIPOD","PROBAST",selected="CHEERS")),style='margin-left:15px'),
+              downloadButton("download_template",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')
+            ),
+            br(),
+            br(),
+            p("Guidance for template use",style='font-weight: bold'),
+            p("1. Data for each study is entered as a separate column. Study names can be changed as needed. For example, Smith et. al (2023) in place of Study 1. Assigned field names will be displayed in all application figures and data summaries."),
+            p("2. Field values for each study should be entered as short text labels (e.g, 'Yes', 'No', 'Partial' or 'Not applicable). Entered values will be used as categories to summarise data in all application outputs."),
+            p("2. The field names 'section' and 'checklist_list' must not be changed in the template. Field values in any column may be edited if required."),
+            p("3. Save the completed template as a an .xlsx or .csv file"),
+            p("4. Upload the completed template in the Application menu"),
+            p("The full list of checklist item descriptions can be found in the worksheet named 'Full checklist'")
+            
+            
+            ),
     # main output window
     tabItem(tabName = "setup",
             fluidPage(
