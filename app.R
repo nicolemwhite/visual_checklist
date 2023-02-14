@@ -3,6 +3,7 @@ library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(tidyverse)
+library(vroom)
 library(janitor)
 library(flextable)
 library(colourpicker)
@@ -347,9 +348,7 @@ server <- function(input, output,session) {
         index_study <- round(as.numeric((input$plot_click$y)))
         index_score <- ceiling(as.numeric((input$plot_click$x)))
         
-        #get the corresponding study (yaxis) and item score category (fill)
-        #target_study_score = filter(index_intervals,study_label_index==index_study,a<=index_score,index_score<=b)
-        
+ 
         target_study_score = filter(index_dat,study_label_index==index_study,item_score_index==index_score) %>% select(study_label_index,item_score)
         
         summary_dat = semi_join(index_dat,target_study_score, by = c("study_label_index", "item_score"))
@@ -357,7 +356,6 @@ server <- function(input, output,session) {
         target_item_score = unique(summary_dat$item_score)
         
         tab_output = summary_dat %>% 
-          #mutate(checklist_item=paste0(item_number,'. ',item_text)) %>%
           mutate_at('section',~factor(.,levels=unique(.))) %>%
           group_by(section) %>% summarise('Checklist item(s)' = paste(checklist_item,collapse = '; '),.groups='drop') %>% rename('Section'=section) 
         text_output = paste0(target_study,': ',target_item_score)
@@ -407,7 +405,6 @@ server <- function(input, output,session) {
     cat(paste0("
     library(tidyverse)
     library(vroom)
-    
     data = vroom('",input$upload$name,"', delim = ',',col_types='c')
     
     plot_data = data %>% 
@@ -560,11 +557,11 @@ server <- function(input, output,session) {
   
   #downlaod template
   fn_downloadname_template <- reactive({
-    if(input$template=='CHEERS') filename <- 'data/template_cheers.xlsx'
-    if(input$template=='STROBE') filename <- 'data/template_strobe.xlsx'
-    if(input$template=='TRIPOD') filename <- 'data/template_tripod.xlsx'
-    if(input$template=='PROBAST') filename <- 'data/template_probast.xlsx'
-    if(input$template=='TIDierR') filename <- 'data/template_tidier.xlsx'
+    if(input$template=='CHEERS') filename <- 'template_cheers.xlsx'
+    if(input$template=='STROBE') filename <- 'template_strobe.xlsx'
+    if(input$template=='TRIPOD') filename <- 'template_tripod.xlsx'
+    if(input$template=='PROBAST') filename <- 'template_probast.xlsx'
+    if(input$template=='TIDierR') filename <- 'template_tidier.xlsx'
     return(filename)
   })
   
