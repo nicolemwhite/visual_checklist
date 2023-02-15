@@ -58,7 +58,7 @@ body <- dashboardBody(
             br(),
             p("To get started, download a template from the dropdown menu below:"),
             fluidRow(
-              column(3,selectInput(inputId="template",label='Select template',choices=c("CHEERS","STROBE","TRIPOD","PROBAST","TIDierR",selected="CHEERS")),style='margin-left:15px'),
+              column(3,selectInput(inputId="template",label='Select template',choices=c("CONSORT","CHEERS","PRISMA","PRISMA ScR","PROBAST","SPIRIT","SQUIRE","SRQR","STARD","STROBE","TIDIER","TRIPOD"),selected="CONSORT"),style='margin-left:15px'),
               downloadButton("download_template",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')
             ),
             br(),
@@ -555,27 +555,26 @@ server <- function(input, output,session) {
     }
   ) 
   
-  #downlaod template
+  #download template
   fn_downloadname_template <- reactive({
-    if(input$template=='CHEERS') filename <- 'template_cheers.xlsx'
-    if(input$template=='STROBE') filename <- 'template_strobe.xlsx'
-    if(input$template=='TRIPOD') filename <- 'template_tripod.xlsx'
-    if(input$template=='PROBAST') filename <- 'template_probast.xlsx'
-    if(input$template=='TIDierR') filename <- 'template_tidier.xlsx'
+    fname = tolower(input$template)
+    filename <- paste0('template_',fname,'.csv',sep="")
     return(filename)
   })
   
   output$download_template<-downloadHandler(
-    filename = function(){
-      switch(input$template,
-        'CHEERS' = 'template_cheers.xlsx',
-        'STROBE' = 'template_strobe.xlsx',
-        'TRIPOD' = 'template_tripod.xlsx',
-        'PROBAST' = 'template_probast.xlsx',
-        'TIDierR' = 'template_tidier.xlsx'
-      )},
+    # filename = function(){
+    #   switch(input$template,
+    #     'CHEERS' = 'template_cheers.xlsx',
+    #     'STROBE' = 'template_strobe.xlsx',
+    #     'TRIPOD' = 'template_tripod.xlsx',
+    #     'PROBAST' = 'template_probast.xlsx',
+    #     'TIDierR' = 'template_tidier.xlsx'
+    #   )},
+    filename = fn_downloadname_template,
     
     content = function(file) {
+      fn_downloadname_template()
       file.copy(fn_downloadname_template(),file)
     })
   

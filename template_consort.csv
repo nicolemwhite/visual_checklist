@@ -1,38 +1,38 @@
-,,1a,Identification as a randomised trial in the title
-,,1b,"Structured summary of trial design, methods, results, and conclusions"
-,,2a,Scientific background and explanation of rationale
-,,2b,Specific objectives or hypotheses
-Trial design,,3a,"Description of trial design (such as parallel, factorial) including allocation ratio"
-,,3b,"Important changes to methods after trial commencement (such as eligibility criteria), with reasons"
-Participants,,4a,Eligibility criteria for participants
-,,4b,Settings and locations where the data were collected
-Interventions,,5,"The interventions for each group with sufficient details to allow replication, including how and when they were actually administered"
-Outcomes,,6a,"Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed"
-,,6b,"Any changes to trial outcomes after the trial commenced, with reasons"
-Sample size,,7a,How sample size was determined
-,,7b,"When applicable, explanation of any interim analyses and stopping guidelines"
-?Sequence generation,,8a,Method used to generate the random allocation sequence
-?Sequence generation,,8b,Type of randomisation; details of any restriction (such as blocking and block size)
-Allocation concealment mechanism,,9,"Mechanism used to implement the random allocation sequence (such as sequentially numbered containers), describing any steps taken to conceal the sequence until interventions were assigned"
-Implementation,,10,"Who generated the random allocation sequence, who enrolled participants, and who assigned participants to interventions"
-Blinding,,11a,"If done, who was blinded after assignment to interventions (for example, participants, care providers, those assessing outcomes) and how"
-Blinding,,11b,"If relevant, description of the similarity of interventions"
-Statistical methods,,12a,Statistical methods used to compare groups for primary and secondary outcomes
-Statistical methods,,12b,"Methods for additional analyses, such as subgroup analyses and adjusted analyses"
-results,Participant flow (a diagram is strongly recommended),13a,"For each group, the numbers of participants who were randomly assigned, received intended treatment, and were analysed for the primary outcome"
-,,13b,"For each group, losses and exclusions after randomisation, together with reasons"
-,Recruitment,14a,Dates defining the periods of recruitment and follow-up
-,,14b,Why the trial ended or was stopped
-,Baseline data,15,A table showing baseline demographic and clinical characteristics for each group
-,Numbers analysed,16,"For each group, number of participants (denominator) included in each analysis and whether the analysis was by original assigned groups"
-,Outcomes and estimation,17a,"For each primary and secondary outcome, results for each group, and the estimated effect size and its precision (such as 95% confidence interval)"
-,,17b,"For binary outcomes, presentation of both absolute and relative effect sizes is recommended"
-,Ancillary analyses,18,"Results of any other analyses performed, including subgroup analyses and adjusted analyses, distinguishing pre-specified from exploratory"
-,Harms,19,All important harms or unintended effects in each group (for specific guidance see CONSORT for harms)
-Discussion,Limitations,20,"Trial limitations, addressing sources of potential bias, imprecision, and, if relevant, multiplicity of analyses"
-,Generalisability,21,"Generalisability (external validity, applicability) of the trial findings"
-,Interpretation,22,"Interpretation consistent with results, balancing benefits and harms, and considering other relevant evidence"
-Other information,Registration,23,Registration number and name of trial registry
-,Protocol,24,"Where the full trial protocol can be accessed, if available"
-,Funding,25,"Sources of funding and other support (such as supply of drugs), role of funders"
-,,,
+section,checklist_item,Study 1,Study 2
+Title and Abstract,1a. Title and Abstract,,
+Title and Abstract,1b. Title and Abstract,,
+Introduction,2a. Background and objectives,,
+Introduction,2b. Background and objectives,,
+Methods,3a. Trial design,,
+Methods,3b. Trial design,,
+Methods,4a. Participants,,
+Methods,4b. Participants,,
+Methods,5. Interventions,,
+Methods,6a. Outcomes,,
+Methods,6b. Outcomes,,
+Methods,7a. Sample size,,
+Methods,7b. Sample size,,
+Methods,8a. Randomisation: Sequence generation,,
+Methods,8b. Randomisation: Sequence generation,,
+Methods,9. Allocation: concealment mechanism,,
+Methods,10. Implementation,,
+Methods,11a. Blinding,,
+Methods,11b. Blinding,,
+Methods,12a. Statistical methods,,
+Methods,12b. Statistical methods,,
+Results,13a. Participant flow,,
+Results,13b. Participant flow,,
+Results,14a. Recruitment,,
+Results,14b. Recruitment,,
+Results,15. Baseline data,,
+Results,16. Numbers analysed,,
+Results,17a. Outcomes and estimation,,
+Results,17b. Outcomes and estimation,,
+Results,18. Ancillary analyses,,
+Results,19. Harms,,
+Discussion,20. Limitations,,
+Discussion,21. Generalisability,,
+Discussion,22. Interpretation,,
+Other information,23. Registration,,
+Other information,24. Protocol,,
+Other information,25. Funding,,

@@ -1,10 +1,10 @@
-section,checklist_item,item_full_text,Study 1,Study 2,Study 3,Study 4,Study 5,Study 6,Study 7,Study 8,Study 9,Study 10,Study 11,Study 12,Study 13,Study 14,Study 15
-Risk of bias,1. Participants,,No,Not applicable,No,No,No,Not applicable,Unclear,Unclear,Not applicable,Unclear,Yes,Yes,No,No,Yes
-Risk of bias,2. Predictors,,Yes,Yes,Not applicable,No,No,Not applicable,Not applicable,No,Yes,Unclear,Not applicable,Yes,No,Not applicable,Yes
-Risk of bias,3. Outcome,,Unclear,Unclear,Unclear,No,Not applicable,Not applicable,No,Unclear,Not applicable,Yes,Yes,Unclear,Unclear,Yes,No
-Risk of bias,4. Analysis,,No,Not applicable,Not applicable,Not applicable,No,Unclear,Not applicable,Not applicable,Unclear,No,Not applicable,Unclear,No,Not applicable,No
-Applicability,5. Participants,,No,Yes,Not applicable,No,Unclear,No,Not applicable,Yes,Not applicable,Not applicable,Not applicable,No,Not applicable,Not applicable,No
-Applicability,6. Predictors,,No,Unclear,Yes,Unclear,Yes,Unclear,Not applicable,Not applicable,Unclear,Yes,Not applicable,Not applicable,No,Not applicable,No
-Applicability,7. Outcome,,Unclear,No,Yes,Yes,Not applicable,Yes,No,No,Yes,Unclear,No,No,Not applicable,Not applicable,Yes
-Overall,8. Risk of bias,,Not applicable,No,Yes,Yes,No,Unclear,Not applicable,Unclear,Yes,Unclear,Not applicable,Yes,Unclear,Not applicable,Not applicable
-Overall,9. Applicability,,Yes,Yes,No,Unclear,Unclear,Unclear,Not applicable,Yes,Unclear,No,Not applicable,Unclear,No,Unclear,Unclear
+section,checklist_item,Study 1,Study 2,Study 3,Study 4,Study 5,Study 6,Study 7,Study 8,Study 9,Study 10,Study 11,Study 12,Study 13,Study 14,Study 15
+Risk of bias,1. Participants,No,Not applicable,No,No,No,Not applicable,Unclear,Unclear,Not applicable,Unclear,Yes,Yes,No,No,Yes
+Risk of bias,2. Predictors,Yes,Yes,Not applicable,No,No,Not applicable,Not applicable,No,Yes,Unclear,Not applicable,Yes,No,Not applicable,Yes
+Risk of bias,3. Outcome,Unclear,Unclear,Unclear,No,Not applicable,Not applicable,No,Unclear,Not applicable,Yes,Yes,Unclear,Unclear,Yes,No
+Risk of bias,4. Analysis,No,Not applicable,Not applicable,Not applicable,No,Unclear,Not applicable,Not applicable,Unclear,No,Not applicable,Unclear,No,Not applicable,No
+Applicability,5. Participants,No,Yes,Not applicable,No,Unclear,No,Not applicable,Yes,Not applicable,Not applicable,Not applicable,No,Not applicable,Not applicable,No
+Applicability,6. Predictors,No,Unclear,Yes,Unclear,Yes,Unclear,Not applicable,Not applicable,Unclear,Yes,Not applicable,Not applicable,No,Not applicable,No
+Applicability,7. Outcome,Unclear,No,Yes,Yes,Not applicable,Yes,No,No,Yes,Unclear,No,No,Not applicable,Not applicable,Yes
+Overall,8. Risk of bias,Not applicable,No,Yes,Yes,No,Unclear,Not applicable,Unclear,Yes,Unclear,Not applicable,Yes,Unclear,Not applicable,Not applicable
+Overall,9. Applicability,Yes,Yes,No,Unclear,Unclear,Unclear,Not applicable,Yes,Unclear,No,Not applicable,Unclear,No,Unclear,Unclear
