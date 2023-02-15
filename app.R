@@ -53,7 +53,7 @@ body <- dashboardBody(
   
   tabItems(
     tabItem(tabName='home',
-            p("Reporting checklists provide expert guidance to researchers on how to transparently report details of their study. Summarising adherence to reporting checklists across multiple studies is a useful way to assess current trends in reporting, for example, as part of a systematic or scoping review."),
+            p("Reporting checklists provide expert guidance to researchers on how to transparently report details of their study. Summarising adherence to reporting checklists across multiple studies is a useful way to assess current trends in reporting, for example, as part of a literature review."),
             p("This Shiny application summarises assessments of individual studies against reporting checklists, based on data provided by the user. Results are summarised as figures and tables, which can be downloaded for use in reports or publications."),
             br(),
             p("To get started, download a template from the dropdown menu below:"),
@@ -70,10 +70,22 @@ body <- dashboardBody(
             p("4. Save the completed template as a an .xlsx or .csv file"),
             p("5. Upload the completed template in the Application menu"),
             br(),
-            p('Full details are provided in the application',a(href='https://www.qut.edu.au/','vignette')),
+            p('Full details are provided in the application',a(href='https://www.qut.edu.au/','vignette'),'. Questions about ShinyPrior and suggestions for future updates can be sent to',a(href="https://www.aushsi.org.au/about-us/team/nicole-white/", "Nicole White")),
+            br(),
             p("Recommended citation",style='font-weight: bold'),
             p('White NM, Borg DN, Barnett AG. A Shiny application to summarise study adherence to
-reporting checklists. OSF Preprints [date here]. https://www.doi.org/x.')
+reporting checklists. OSF Preprints [date here]. https://www.doi.org/x.'),
+            br(),
+            strong("Contributors",style='font-weight: bold'),
+            br(),
+            p('Nicole White (Conceptualization, Methodology, Software, Writing - Original Draft)'),
+            p('David Borg (Conceptualization, Validation, Writing - Original Draft)'),
+            p('Adrian Barnett (Conceptualization, Validation, Writing - Review and Editing)'),
+            br(),
+            strong("Acknowledgement",style='font-weight: bold'),
+            br(),
+            p('We thank', a(href="https://www.aushsi.org.au/about-us/team/sameera-senanayake/","Sameera Senanayake"),'for their feedback that improved early versions of the application')
+            
             
             ),
     # main output window
@@ -174,8 +186,9 @@ server <- function(input, output,session) {
     switch(ext,
            csv = vroom::vroom(input$upload$datapath, delim = ",",col_types="c"),
            tsv = vroom::vroom(input$upload$datapath, delim = "\t"),
-           validate("Invalid file; Please upload a .csv or .tsv file")
+           validate("Invalid file; Please upload a .csv or .tsv file")      
     )
+    
     
   })
   
@@ -211,6 +224,8 @@ server <- function(input, output,session) {
   }
   
   plot_studies <-function(){
+    validate(check_col_names(data()))
+    
     show_legend = legend_positions[[input$legend]]
 
     
@@ -270,10 +285,16 @@ server <- function(input, output,session) {
   plot_output<-reactive({plot_studies()})
 
   
+  check_col_names <- function(indat = data()){
+    col_vars = names(indat)
+    if(!all(c('section','checklist_item') %in% col_vars)){paste("The variables 'section' and 'checklist_item' must appear as variable names in the dataset. Please update your dataset and upload again.")}
+    else{NULL}
+  }
   check_total_items <- function(K=plot_output()$K,chosen_palette=NULL){
     if(K>chosen_palette){paste("The number of scoring categories is greater than the number of colours available. Choose a different colour scheme or reduce the number of item categories in the dataset")}
     else{NULL}
   }
+  
   
   create_custom_plot <- function(){
     validate(check_total_items(plot_output()$K,length(colourschemes[[input$colourscheme]])))
