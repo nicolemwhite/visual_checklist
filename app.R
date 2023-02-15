@@ -58,7 +58,7 @@ body <- dashboardBody(
             br(),
             p("To get started, download a template from the dropdown menu below:"),
             fluidRow(
-              column(3,selectInput(inputId="template",label='Select template',choices=c("CONSORT","CHEERS","PRISMA","PRISMA ScR","PROBAST","SPIRIT","SQUIRE","SRQR","STARD","STROBE","TIDIER","TRIPOD"),selected="CONSORT"),style='margin-left:15px'),
+              column(3,selectInput(inputId="template",label='Select template',choices=c("CONSORT","CHEERS","PRISMA","PRISMA ScR","PROBAST","SPIRIT","SQUIRE","SRQR","STARD","STROBE","TIDIER","TRIPOD","Custom"),selected="CONSORT"),style='margin-left:15px'),
               downloadButton("download_template",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')
             ),
             br(),
