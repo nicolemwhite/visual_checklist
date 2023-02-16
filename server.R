@@ -419,5 +419,23 @@ server <- function(input, output,session) {
     })
   
   
+  #clear temp files
+  session$onSessionEnded(function() { 
+    tempname = isolate(fn_downloadname_template())
+    if (file.exists(tempname)) {
+      unlink(tempname)
+    } else(NULL) 
+    
+    fname = isolate(fn_downloadname_fig())
+    if (file.exists(fname)) {
+      unlink(fname)
+    } else(NULL)
+    tname = isolate(fn_downloadname_tab())
+    if (file.exists(tname)) {
+      unlink(tname)
+    } else(NULL)    
+  })
+
+    
 }
 
