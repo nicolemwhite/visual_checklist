@@ -415,7 +415,7 @@ server <- function(input, output,session) {
     
     content = function(file) {
       fn_download_template()
-      file.copy(fn_downloadname_template(),file)
+      file.copy(fn_downloadname_template(),file, overwrite=T)
     })
   
   
