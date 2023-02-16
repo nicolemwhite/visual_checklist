@@ -412,7 +412,7 @@ template_data[['tripod']] = tibble(
 
 
 template_data[['custom']] = tibble(
-  section = c('Section 1 ',rep('Section 2'),2),
+  section = c('Section 1 ',rep('Section 2',2)),
   checklist_item = c(
     '1. Checklist item 1',
     '2a. Checklist item 2a',

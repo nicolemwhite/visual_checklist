@@ -389,6 +389,7 @@ server <- function(input, output,session) {
   })
   
   # download handler
+  
   output$downloadTable<- downloadHandler(
     filename = fn_downloadname_tab,
     content = function(file) {
@@ -398,17 +399,20 @@ server <- function(input, output,session) {
   ) 
   
   #download template
+
   fn_download_template <- function(){
     ftab = create_template(choose_template=input$template,indat=template_data)
-    write.table(ftab,file=fn_downloadname_template(),na="",sep=',')
+    write.table(ftab,file=fn_downloadname_template(),na="",sep=',',row.names = FALSE)
   }
   
   
   fn_downloadname_template <- reactive({
     fname = tolower(input$template)
     filename <- paste0('template_',fname,'.csv',sep="")
+    
     return(filename)
   })
+  
   
   output$download_template<-downloadHandler(
     filename = fn_downloadname_template,
@@ -421,11 +425,10 @@ server <- function(input, output,session) {
   
   #clear temp files
   session$onSessionEnded(function() { 
-    tempname = isolate(fn_downloadname_template())
-    if (file.exists(tempname)) {
+    tempname = grep('.csv',list.files(),value=T)
+    #tempname = isolate(fn_downloadname_template())
       unlink(tempname)
-    } else(NULL) 
-    
+
     fname = isolate(fn_downloadname_fig())
     if (file.exists(fname)) {
       unlink(fname)
