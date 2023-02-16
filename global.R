@@ -99,7 +99,7 @@ template_data[['consort']] = tibble(
     '24. Protocol',
     '25. Funding'))
 
-template_date[['prisma']] = tibble(
+template_data[['prisma']] = tibble(
   section=c('Title','Abstract',rep('Introduction',2),rep('Methods',17),rep('Results',11),rep('Discussion',4),rep('Other information',6)),
   checklist_item=c(
     '1. Title',
@@ -172,7 +172,7 @@ template_data[['prisma scr']] = tibble(
     '22. Funding'))
 
 template_data[['probast']] = tibble(
-  section = c(rep('Risk of bias',rep('Applicability',3),rep('Overall',2))),
+  section = c(rep('Risk of bias',4),rep('Applicability',3),rep('Overall',2)),
   checklist_item = c(
     '1. Participants',
     '2. Predictors',
@@ -416,7 +416,7 @@ template_data[['custom']] = tibble(
   checklist_item = c(
     '1. Checklist item 1',
     '2a. Checklist item 2a',
-    '2b. Checklist item 2b',))
+    '2b. Checklist item 2b'))
 
 
 create_template = function(choose_template,indat=template_data){

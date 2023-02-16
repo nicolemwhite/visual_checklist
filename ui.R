@@ -45,7 +45,7 @@ body <- dashboardBody(
             p("4. Save the completed template as a an .xlsx or .csv file"),
             p("5. Upload the completed template in the Application menu"),
             br(),
-            p('Full details are provided in the application',a(href='https://www.qut.edu.au/','vignette'),'. Questions about ShinyPrior and suggestions for future updates can be sent to',a(href="https://www.aushsi.org.au/about-us/team/nicole-white/", "Nicole White")),
+            p('Full details are provided in the application',a(href='https://osf.io/preprints/uhqzf/','vignette'),'. Questions about ShinyPrior and suggestions for future updates can be sent to',a(href="https://www.aushsi.org.au/about-us/team/nicole-white/", "Nicole White")),
             br(),
             p("Recommended citation",style='font-weight: bold'),
             p('White NM, Borg DN, Barnett AG. A Shiny application to summarise study adherence to
