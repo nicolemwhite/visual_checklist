@@ -1,6 +1,8 @@
 # visual_checklist
-Visualisation of reporting checklists
-CHEERS statement included as an example dataset
-Make the example file as an Excel file and add another sheet that explains what all the columns and formats should be
-Add link to https://www.goodreports.org/
-Add an option where a user can download code and/or a the ggplot data. To make it easier for advanced users to add their own customisation.
+Reporting checklists provide expert guidance to researchers on how to transparently report details of their study. Summarising adherence to reporting checklists across multiple studies is a useful way to assess current trends in reporting, for example, as part of a literature review.
+
+This Shiny application summarises assessments of individual studies against reporting checklists, based on data provided by the user. Results are summarised as figures and tables, which can be downloaded for use in reports or publications.
+
+Full details are provided in the application vignette.
+
+For the full list of EQUATOR reporting checklists see https://www.equator-network.org/reporting-guidelines or https://www.goodreports.org/
