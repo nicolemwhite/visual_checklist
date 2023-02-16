@@ -49,7 +49,7 @@ body <- dashboardBody(
             br(),
             p("Recommended citation",style='font-weight: bold'),
             p('White NM, Borg DN, Barnett AG. A Shiny application to summarise study adherence to
-reporting checklists. OSF Preprints [date here]. https://www.doi.org/x.'),
+reporting checklists.  OSF Preprints. 16 February 2023. DOI:10.31219/osf.io/uhqzf.'),
             br(),
             strong("Contributors",style='font-weight: bold'),
             br(),
