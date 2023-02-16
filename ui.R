@@ -46,6 +46,8 @@ body <- dashboardBody(
             p("5. Upload the completed template in the Application menu"),
             br(),
             p('Full details are provided in the application',a(href='https://osf.io/preprints/uhqzf/','vignette'),'. Questions about ShinyPrior and suggestions for future updates can be sent to',a(href="https://www.aushsi.org.au/about-us/team/nicole-white/", "Nicole White")),
+            p('The full list of EQUATOR reporting checklists can be found at the',a(href="https://www.equator-network.org/reporting-guidelines",'EQUATOR website'), 'and',a(href="https://www.goodreports.org/",'goodreports.org')),
+            
             br(),
             p("Recommended citation",style='font-weight: bold'),
             p('White NM, Borg DN, Barnett AG. A Shiny application to summarise study adherence to
