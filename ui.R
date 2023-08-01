@@ -37,6 +37,7 @@ body <- dashboardBody(
               downloadButton("download_template",style = 'margin-left:0px;margin-top:25px;background-color:	#f9f9f9;font-family: Arial;font-weight: bold')
             ),
             br(),
+            p('Here is an example of a ',a(target="_blank",href='example_cheers_completed.csv','completed template'), '.'),
             br(),
             p("Guidance for template use",style='font-weight: bold'),
             p("1. Data for each study is entered as a separate column. Study names can be changed as needed. For example, Smith et. al (2023) in place of Study 1. Assigned field names will be displayed in all application figures and data summaries."),
@@ -45,7 +46,7 @@ body <- dashboardBody(
             p("4. Save the completed template as a an .xlsx or .csv file"),
             p("5. Upload the completed template in the Application menu"),
             br(),
-            p('Full details are provided in the application',a(href='https://osf.io/preprints/uhqzf/','vignette'),'. Questions about ShinyPrior and suggestions for future updates can be sent to',a(href="https://www.aushsi.org.au/about-us/team/nicole-white/", "Nicole White")),
+            p('Full details are provided in the application',a(href='https://osf.io/preprints/uhqzf/','vignette'),'. Questions and suggestions for future updates can be sent to',a(href="https://www.aushsi.org.au/about-us/team/nicole-white/", "Nicole White")),
             p('The full list of EQUATOR reporting checklists can be found at the',a(href="https://www.equator-network.org/reporting-guidelines",'EQUATOR website'), 'and',a(href="https://www.goodreports.org/",'goodreports.org')),
             
             br(),

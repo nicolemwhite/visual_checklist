@@ -65,7 +65,7 @@ server <- function(input, output,session) {
     if(input$chooseViz=="Full dataset"){
       final_plot <- plot_data %>% 
         ggplot(aes(x=item_number,y=study_label,fill=item_score))+
-        geom_tile(colour = 'white', size = 0.5) +
+        geom_tile(colour = 'white', linewidth = 0.5) +
         scale_x_discrete(input$xlabtext,breaks=item_lookup$item_number,labels=str_wrap(item_lookup$checklist_item,50))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
@@ -258,7 +258,7 @@ server <- function(input, output,session) {
       item_lookup = plot_data %>% distinct(item_number,checklist_item)
       
       final_plot <- plot_data %>% ggplot(aes(x=item_number,y=study_label,fill=item_score))+
-        geom_tile(colour = 'white', size = 0.5) +
+        geom_tile(colour = 'white', linewidth = 0.5) +
         scale_x_discrete('",input$xlabtext,"',breaks=item_lookup$item_number,labels=str_wrap(item_lookup$checklist_item,50))+
         theme(axis.text.x = element_text(angle = 45, hjust=1),
               panel.background = element_blank(),
